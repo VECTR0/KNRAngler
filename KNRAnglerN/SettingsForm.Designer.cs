@@ -35,11 +35,12 @@
             this.txtIp = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.pnlSettings = new System.Windows.Forms.Panel();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.btnConnectJson = new System.Windows.Forms.Button();
             this.chkManualControl = new System.Windows.Forms.CheckBox();
             this.chkVideoFeed = new System.Windows.Forms.CheckBox();
+            this.btnConnectJson = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.chkYeetLog = new System.Windows.Forms.CheckBox();
             this.pnlSettings.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -100,6 +101,7 @@
             // 
             // pnlSettings
             // 
+            this.pnlSettings.Controls.Add(this.chkYeetLog);
             this.pnlSettings.Controls.Add(this.chkManualControl);
             this.pnlSettings.Controls.Add(this.chkVideoFeed);
             this.pnlSettings.Controls.Add(this.btnConnectJson);
@@ -113,36 +115,8 @@
             this.pnlSettings.Controls.Add(this.btnConnectVideo);
             this.pnlSettings.Location = new System.Drawing.Point(0, 0);
             this.pnlSettings.Name = "pnlSettings";
-            this.pnlSettings.Size = new System.Drawing.Size(365, 130);
+            this.pnlSettings.Size = new System.Drawing.Size(365, 161);
             this.pnlSettings.TabIndex = 36;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 62);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(57, 13);
-            this.label3.TabIndex = 35;
-            this.label3.Text = "WAPI Port";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 36);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(56, 13);
-            this.label2.TabIndex = 35;
-            this.label2.Text = "Video Port";
-            // 
-            // btnConnectJson
-            // 
-            this.btnConnectJson.Location = new System.Drawing.Point(173, 57);
-            this.btnConnectJson.Name = "btnConnectJson";
-            this.btnConnectJson.Size = new System.Drawing.Size(90, 23);
-            this.btnConnectJson.TabIndex = 37;
-            this.btnConnectJson.Text = "Connect WAPI";
-            this.btnConnectJson.UseVisualStyleBackColor = true;
-            this.btnConnectJson.Click += new System.EventHandler(this.btnConnectJson_Click);
             // 
             // chkManualControl
             // 
@@ -169,11 +143,50 @@
             this.chkVideoFeed.Text = "Enable video feed";
             this.chkVideoFeed.UseVisualStyleBackColor = true;
             // 
+            // btnConnectJson
+            // 
+            this.btnConnectJson.Location = new System.Drawing.Point(173, 57);
+            this.btnConnectJson.Name = "btnConnectJson";
+            this.btnConnectJson.Size = new System.Drawing.Size(90, 23);
+            this.btnConnectJson.TabIndex = 37;
+            this.btnConnectJson.Text = "Connect WAPI";
+            this.btnConnectJson.UseVisualStyleBackColor = true;
+            this.btnConnectJson.Click += new System.EventHandler(this.btnConnectJson_Click);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(4, 62);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(57, 13);
+            this.label3.TabIndex = 35;
+            this.label3.Text = "WAPI Port";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(4, 36);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(56, 13);
+            this.label2.TabIndex = 35;
+            this.label2.Text = "Video Port";
+            // 
+            // chkYeetLog
+            // 
+            this.chkYeetLog.AutoSize = true;
+            this.chkYeetLog.BackColor = System.Drawing.SystemColors.Control;
+            this.chkYeetLog.Location = new System.Drawing.Point(7, 131);
+            this.chkYeetLog.Name = "chkYeetLog";
+            this.chkYeetLog.Size = new System.Drawing.Size(177, 17);
+            this.chkYeetLog.TabIndex = 38;
+            this.chkYeetLog.Text = "Yeet networking logs to console";
+            this.chkYeetLog.UseVisualStyleBackColor = false;
+            // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(365, 131);
+            this.ClientSize = new System.Drawing.Size(365, 162);
             this.Controls.Add(this.pnlSettings);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
@@ -200,5 +213,6 @@
         public System.Windows.Forms.Button btnConnectJson;
         public System.Windows.Forms.CheckBox chkManualControl;
         public System.Windows.Forms.CheckBox chkVideoFeed;
+        public System.Windows.Forms.CheckBox chkYeetLog;
     }
 }

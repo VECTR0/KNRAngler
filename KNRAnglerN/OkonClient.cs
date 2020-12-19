@@ -67,8 +67,8 @@ namespace KNRAnglerN
                         int dataLength = System.BitConverter.ToInt32(dataLenBytes, 0);
                         dataBytes = new byte[dataLength];
                         ReadAllFromStream(_stream, dataBytes, dataLength);
-                        PacketReceived(this, new PacketEventArgs(packetType, dataBytes));
-                        _info.YeetLog("Received packet type: " + packetType.ToString("x2") + " len: " + dataLength);
+                        PacketReceived(this, new PacketEventArgs(packetType, packetFlag, dataBytes));
+                        _info.YeetLog("Received packet type: " + packetType.ToString("x2") + " flag:" + Convert.ToString(packetFlag, 2).PadLeft(8, '0') + " len: " + dataLength);
                     }
                     else Thread.Sleep(10);
                 }
@@ -116,9 +116,11 @@ namespace KNRAnglerN
         {
             public readonly byte[] packetData;
             public readonly byte packetType;
-            public PacketEventArgs(byte type, byte[] data)
+            public readonly byte packetFlag;
+            public PacketEventArgs(byte type, byte flag, byte[] data)
             {
                 this.packetType = type;
+                this.packetFlag = flag;
                 this.packetData = data;
             }
         }

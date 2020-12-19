@@ -42,6 +42,14 @@ namespace KNRAnglerN
             GET_DETE = 0xDE
         }
 
+        [Flags]
+        private enum Flag
+        {
+            None = 0,
+            SERVER_ECHO = 1,
+            DO_NOT_LOG_PACKET = 2,
+            TEST = 128
+        }
         public MainForm()
         {
             InitializeComponent();
@@ -57,7 +65,8 @@ namespace KNRAnglerN
             public Info(MainForm instance) => this.mainFormInstance = instance;
             public void YeetLog(string info)
             {
-                //instance.txtConsole.AppendText("[LOG]: " + info + Environment.NewLine);
+                if (mainFormInstance.settingsForm.chkYeetLog.Checked)
+                    mainFormInstance.consoleForm.txtConsole.AppendText("[LOG]: " + info + Environment.NewLine);
             }
             public void YeetException(Exception exp)
             {
