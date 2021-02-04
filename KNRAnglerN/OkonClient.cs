@@ -82,6 +82,23 @@ namespace KNRAnglerN
                 Disconnect();
             }
         }
+        public void SendString(byte packetType, byte packetFlag, string json)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes(json);
+            _stream.WriteByte(packetType);
+            _stream.WriteByte(packetFlag);
+            _stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
+            _stream.Write(bytes, 0, bytes.Length);
+        }
+
+        public void SendBytes(byte packetType, byte packetFlag, byte[] bytes)
+        {
+            _stream.WriteByte(packetType);
+            _stream.WriteByte(packetFlag);
+            _stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
+            _stream.Write(bytes, 0, bytes.Length);
+        }
+
         public void SendBytes(byte packetType, byte[] data)
         {
             _stream.WriteByte(packetType);

@@ -13,7 +13,7 @@ namespace KNRAnglerN
 {
     public partial class MainForm : Form
     {
-        public const string ver = "7.0"; 
+        public const string ver = "7.1"; 
         public readonly ConsoleForm consoleForm;
         public readonly SettingsForm settingsForm;
         public OkonClient okonClient;
@@ -128,7 +128,7 @@ namespace KNRAnglerN
                 if (requestedVideoFeedFrames < 2)
                     try
                     {
-                        okonClient.SendString((byte)Packet.GET_VIDEO_BYTES, "");
+                        okonClient.SendString((byte)Packet.GET_VIDEO_BYTES, (byte)Flag.DO_NOT_LOG_PACKET, "");
                         requestedVideoFeedFrames++;
                     }
                     catch
@@ -139,7 +139,7 @@ namespace KNRAnglerN
                 if (requestedDepthMapFrames < 2)
                     try
                     {
-                        okonClient.SendString((byte)Packet.GET_DEPTH_BYTES, "");
+                        okonClient.SendString((byte)Packet.GET_DEPTH_BYTES, (byte)Flag.DO_NOT_LOG_PACKET, "");
                         requestedDepthMapFrames++;
                     }
                     catch
@@ -188,7 +188,7 @@ namespace KNRAnglerN
             float r = Math.Max(Math.Min((-1 * dir + 1 * vel), 1), -1);
             try
             {
-                okonClient.SendString((byte)Packet.SET_MTR, "{\"FL\":" + fr.ToString().Replace(',','.') + ",\"FR\":" + fr.ToString().Replace(',', '.') + ",\"ML\":" + l.ToString().Replace(',', '.') + ",\"MR\":" + r.ToString().Replace(',', '.') + ",\"B\":" + ba.ToString().Replace(',', '.') + "}");
+                okonClient.SendString((byte)Packet.SET_MTR, (byte)Flag.DO_NOT_LOG_PACKET, "{\"FL\":" + fr.ToString().Replace(',','.') + ",\"FR\":" + fr.ToString().Replace(',', '.') + ",\"ML\":" + l.ToString().Replace(',', '.') + ",\"MR\":" + r.ToString().Replace(',', '.') + ",\"B\":" + ba.ToString().Replace(',', '.') + "}");
             }
             catch
             {
@@ -219,7 +219,7 @@ namespace KNRAnglerN
                 try
                 {
                     long time = (System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond);
-                    okonClient.SendString((byte)Packet.PING, "{\"timestamp\":" + time + ",\"ping\":0}");
+                    okonClient.SendString((byte)Packet.PING, (byte)Flag.DO_NOT_LOG_PACKET, "{\"timestamp\":" + time + ",\"ping\":0}");
                 }
                 catch { }
             }
