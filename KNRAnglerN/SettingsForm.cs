@@ -82,5 +82,10 @@ namespace KNRAnglerN
             mainFormInstance.requestedVideoFeedFrames = 0;
             mainFormInstance.requestedDepthMapFrames = 0;
         }
+
+        private void chkDepth_CheckedChanged(object sender, EventArgs e)
+        {
+            mainFormInstance.picDepthMap.Visible = chkDepth.Checked;
+        }
     }
 }

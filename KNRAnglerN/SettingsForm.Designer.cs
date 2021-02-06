@@ -35,12 +35,13 @@
             this.txtIp = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.pnlSettings = new System.Windows.Forms.Panel();
+            this.chkYeetLog = new System.Windows.Forms.CheckBox();
             this.chkManualControl = new System.Windows.Forms.CheckBox();
             this.chkVideoFeed = new System.Windows.Forms.CheckBox();
             this.btnConnectJson = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.chkYeetLog = new System.Windows.Forms.CheckBox();
+            this.chkDepth = new System.Windows.Forms.CheckBox();
             this.pnlSettings.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -101,6 +102,7 @@
             // 
             // pnlSettings
             // 
+            this.pnlSettings.Controls.Add(this.chkDepth);
             this.pnlSettings.Controls.Add(this.chkYeetLog);
             this.pnlSettings.Controls.Add(this.chkManualControl);
             this.pnlSettings.Controls.Add(this.chkVideoFeed);
@@ -115,8 +117,19 @@
             this.pnlSettings.Controls.Add(this.btnConnectVideo);
             this.pnlSettings.Location = new System.Drawing.Point(0, 0);
             this.pnlSettings.Name = "pnlSettings";
-            this.pnlSettings.Size = new System.Drawing.Size(365, 161);
+            this.pnlSettings.Size = new System.Drawing.Size(365, 174);
             this.pnlSettings.TabIndex = 36;
+            // 
+            // chkYeetLog
+            // 
+            this.chkYeetLog.AutoSize = true;
+            this.chkYeetLog.BackColor = System.Drawing.SystemColors.Control;
+            this.chkYeetLog.Location = new System.Drawing.Point(7, 131);
+            this.chkYeetLog.Name = "chkYeetLog";
+            this.chkYeetLog.Size = new System.Drawing.Size(177, 17);
+            this.chkYeetLog.TabIndex = 38;
+            this.chkYeetLog.Text = "Yeet networking logs to console";
+            this.chkYeetLog.UseVisualStyleBackColor = false;
             // 
             // chkManualControl
             // 
@@ -171,22 +184,23 @@
             this.label2.TabIndex = 35;
             this.label2.Text = "Video Port";
             // 
-            // chkYeetLog
+            // chkDepth
             // 
-            this.chkYeetLog.AutoSize = true;
-            this.chkYeetLog.BackColor = System.Drawing.SystemColors.Control;
-            this.chkYeetLog.Location = new System.Drawing.Point(7, 131);
-            this.chkYeetLog.Name = "chkYeetLog";
-            this.chkYeetLog.Size = new System.Drawing.Size(177, 17);
-            this.chkYeetLog.TabIndex = 38;
-            this.chkYeetLog.Text = "Yeet networking logs to console";
-            this.chkYeetLog.UseVisualStyleBackColor = false;
+            this.chkDepth.AutoSize = true;
+            this.chkDepth.BackColor = System.Drawing.SystemColors.Control;
+            this.chkDepth.Location = new System.Drawing.Point(6, 154);
+            this.chkDepth.Name = "chkDepth";
+            this.chkDepth.Size = new System.Drawing.Size(106, 17);
+            this.chkDepth.TabIndex = 38;
+            this.chkDepth.Text = "Show depth map";
+            this.chkDepth.UseVisualStyleBackColor = false;
+            this.chkDepth.CheckedChanged += new System.EventHandler(this.chkDepth_CheckedChanged);
             // 
             // SettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(365, 162);
+            this.ClientSize = new System.Drawing.Size(365, 175);
             this.Controls.Add(this.pnlSettings);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
@@ -214,5 +228,6 @@
         public System.Windows.Forms.CheckBox chkManualControl;
         public System.Windows.Forms.CheckBox chkVideoFeed;
         public System.Windows.Forms.CheckBox chkYeetLog;
+        public System.Windows.Forms.CheckBox chkDepth;
     }
 }
