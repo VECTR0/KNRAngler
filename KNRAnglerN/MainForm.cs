@@ -254,62 +254,75 @@ namespace KNRAnglerN
                     g.FillRectangle(Brushes.Black, 0, 0, W, H);
                     //g.DrawLine(Pens.Green, 0, H / 2, W, H / 2);
                     // g.DrawLine(Pens.Green, W/2, 0, W/2, H);
-                    Pen green = new Pen(Brushes.Red, 3);
+                    Pen green = new Pen(Brushes.Orange, 3);
+                    Pen debug = new Pen(Brushes.Aquamarine, 1);
 
-                    {//HEADING
+
+                    {//HEADING\
                         float w = 0.5f;
-                        float h = 0.06f;
-                        float hfov = 91.5f; //horizontal fov
-                        float fontHeight = 20;
-                        Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
-                        float fontWidth = g.MeasureString("000", f).Width / 3;
-                        float fontBottom = H * h * 0.3f;
-                        float hdg = sens.gyro.y;//(float)( ( 30+90*Math.Sin(time*0.1) )%360 );
-                                                //if (hdg < 0) hdg += 360f;
-                        float top = 0.01f;
-                        float smallLine = H * h * 0.3f;
-                        float bigLine = H * h * 0.5f;
-                        //g.DrawRectangle(green, W / 2 - W*w/2, H*top, W*w, H*h);
-                        g.DrawLine(green, W / 2 - W * w / 2, H * top + H * h, W / 2 + W * w / 2, H * top + H * h);
-                        g.DrawLine(green, W / 2 - W * w / 2, H * top + H * h, W / 2 - W * w / 2, H * top);
-                        g.DrawLine(green, W / 2 + W * w / 2, H * top + H * h, W / 2 + W * w / 2, H * top);
-                        g.DrawRectangle(green, W / 2 - 3 * fontWidth / 2, H * top + H * h - fontBottom - fontHeight, 3 * fontWidth, fontHeight);
-                        g.DrawLine(green, W / 2 - fontWidth, H * top + H * h - fontBottom, W / 2, H * h + H * top);
-                        g.DrawLine(green, W / 2 + fontWidth, H * top + H * h - fontBottom, W / 2, H * h + H * top);
-                        g.DrawString(((int)hdg).ToString("000"), f, Brushes.Red, W / 2 - 3 * fontWidth / 2, H * top + H * h - fontBottom - fontHeight);
+                        float h = 0.1f;
+                        float top = 0.05f;
+                        
 
-                        float hudFov = hfov * w;
-                        float closestAngle = (float)Math.Round(hdg / 10.0) * 10f;
-                        float smallestAngle = (float)Math.Floor((closestAngle - hudFov) / 10) * 10f;
-                        smallestAngle = ((smallestAngle % 360) + 360) % 360;
-                        float biggestAngle = (float)Math.Ceiling((closestAngle + hudFov) / 10) * 10f;
-                        biggestAngle = ((biggestAngle % 360) + 360) % 360;
-                        for (float angle = smallestAngle; angle < biggestAngle; angle += 10)
-                        {
-                            float x = W / 2 + (angle - hdg) / hudFov * W * w;
-                            x %= 360 / hfov * W;
-                            if (x > W / 2 - fontWidth * 2f && x < W / 2 + fontWidth * 2f)
-                            {
-                                g.DrawLine(green, x, H * h + H * top, x, H * h + H * top - fontBottom);
-                                continue;
-                            }
-                            if (x < W / 2 - W * w / 2 || x > W / 2 + W * w / 2) continue;
-                            if (angle % 90 == 0) g.DrawLine(green, x, H * h + H * top, x, H * h + H * top - bigLine);
-                            else g.DrawLine(green, x, H * h + H * top, x, H * h + H * top - smallLine);
-                            if (x < W / 2 - W * w / 2 + g.MeasureString(angle.ToString(), f).Width / 2) continue;
-                            if (x > W / 2 + W * w / 2 - g.MeasureString(angle.ToString(), f).Width / 2) continue;
-                            if (x > W / 2 - fontWidth * 2f - g.MeasureString(angle.ToString(), f).Width / 2 && x < W / 2 + fontWidth * 2f + g.MeasureString(angle.ToString(), f).Width / 2) continue;
-                            g.DrawString((Math.Round(((angle % 360) + 360) % 360)).ToString(), f, Brushes.Red, x - g.MeasureString(angle.ToString(), f).Width / 2, H * h + H * top - bigLine * 0.8f - g.MeasureString(angle.ToString(), f).Height);
-                        }
-                    }
+                        float anchorX = W/2 - W * w / 2;
+                        float anchorY = H*top;
 
-                    {//HEADING
-                        float w = 0.5f;
-                        float h = 0.06f;
+                        //g.DrawRectangle(debug, anchorX, anchorY, W * w, H * h);
+                        g.DrawLine(green, anchorX, anchorY + H*h, anchorX + W*w, anchorY+H*h);
 
+                        float textBoxH = 0.7f;
+                        float fontHeight = H * h * textBoxH;
+                        Font f = new Font("Inconsolata", fontHeight * 0.7f, FontStyle.Bold);
 
-                        float hdg;
+                        float rulerH = 0.3f;
+                        float fontSmallH = 0.8f;
+                        float fontSmallHeight = H * h * (1f - rulerH) * fontSmallH;
+                        Font fsmall = new Font("Inconsolata", fontSmallHeight * 0.7f, FontStyle.Bold);
+
+                        float hdg = ((sens.gyro.y%360f)+360f)%360f;
                         float hfov = 91.5f;
+                        float lineY = anchorY + H * h;
+                        float smallLine = 0.7f;
+                        float bigLine = 1f;
+                        for(float angle = 0f; angle < 360; angle += 5)
+                        {
+                            float x = W/2+(angle -hdg)/ hfov * W;
+                            if (x > W/2+180f/hfov*W) x -= 360f/hfov*W;
+                            if (x < W/2-180f/hfov*W) x += 360f/hfov*W;
+                            if (x < anchorX || x > anchorX + W * w) continue;
+                            string str = angle.ToString();
+                            float lineH = smallLine/2;
+                            if (angle % 10 == 0) lineH = smallLine;
+                            if (angle % 90 == 0) lineH = bigLine;
+
+                            if (angle % 10 != 0) str = "";
+                            if(angle == 0) str = "N";
+                            if(angle == 45) str = "NE";
+                            if(angle == 90) str = "E";
+                            if(angle == 135) str = "SE";
+                            if(angle == 180) str = "S";
+                            if(angle == 225) str = "SW";
+                            if(angle == 270) str = "W";
+                            if(angle == 315) str = "NW";
+                            
+                           
+                            g.DrawLine(green, x, lineY, x, lineY - H * h * rulerH * lineH);
+                            g.DrawString(str, fsmall, Brushes.Red, x - g.MeasureString(str, fsmall).Width / 2, lineY - H * h * rulerH * lineH - g.MeasureString(str, fsmall).Height);
+
+                            
+                        }
+
+                        
+                        float fontWidth = g.MeasureString("000", f).Width / 3;
+                        float textBoxW = 0.1f;
+                        float textBoxX = W / 2 - fontWidth * 3 / 2;
+                        float textBoxY = anchorY;
+                        g.DrawLine(green, W / 2, lineY, W / 2- fontWidth * 3/4, lineY - H * h + fontHeight);
+                        g.DrawLine(green, W / 2, lineY, W / 2+ fontWidth * 3 / 4, lineY - H * h + fontHeight);
+                        g.FillRectangle(Brushes.Black, textBoxX, textBoxY, fontWidth * 3, fontHeight);
+                        g.DrawRectangle(green, textBoxX, textBoxY, fontWidth * 3, fontHeight);
+                        g.DrawString(((int)hdg).ToString("000"), f, Brushes.Red, textBoxX, textBoxY);
+
                     }
 
 
