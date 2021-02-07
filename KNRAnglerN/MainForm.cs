@@ -13,6 +13,8 @@ namespace KNRAnglerN
 {
     public partial class MainForm : Form
     {
+        public Sensors sens = new Sensors();
+
         public const string ver = "7.1"; 
         public readonly ConsoleForm consoleForm;
         public readonly SettingsForm settingsForm;
@@ -113,8 +115,16 @@ namespace KNRAnglerN
                     //Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + "size: " + e.packetData.Length +"B";
                     ms = new MemoryStream(e.packetData);
                     img = pictureBox1.Image;
-                    pictureBox1.Image = Image.FromStream(ms);
-                    if (img != null) img.Dispose();
+                    try
+                    {
+                        pictureBox1.Image = Image.FromStream(ms);
+                        if (img != null) img.Dispose();
+                    }
+                    catch { }
+
+                    break;
+                case Packet.GET_SENS:
+                    sens = Utf8Json.JsonSerializer.Deserialize<Sensors>(e.packetData);
                     break;
                 case Packet.PING:
                     json = Utf8Json.JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData));
@@ -233,188 +243,232 @@ namespace KNRAnglerN
         double time = 0;
         private void tmrHUD_Tick(object sender, EventArgs e)
         {
-            int start = DateTime.Now.Millisecond;
-            int W = pictureBox1.Width;
-            int H = pictureBox1.Height;
-            Bitmap b = new Bitmap(W, H);
-            using (Graphics g = Graphics.FromImage(b))
+            try
             {
-                g.FillRectangle(Brushes.Black, 0, 0, W, H);
-                g.DrawLine(Pens.Green, 0, H / 2, W, H / 2);
-                g.DrawLine(Pens.Green, W/2, 0, W/2, H);
-                Pen green = new Pen(Brushes.Green, 3);
-
-                {//HEADING
-                    float w = 0.5f; 
-                    float h = 0.06f;
-                    float hfov = 90; //horizontal fov
-                    float fontHeight = 20;
-                    Font f = new Font("Inconsolata",fontHeight * 0.6f, FontStyle.Bold);
-                    float fontWidth = g.MeasureString("000", f).Width / 3;
-                    float fontBottom = H * h * 0.3f;
-                    float hdg = x;//(float)( ( 30+90*Math.Sin(time*0.1) )%360 );
-                    //if (hdg < 0) hdg += 360f;
-                    float top = 0.01f;
-                    float smallLine = H * h * 0.3f;
-                    float bigLine = H * h * 0.5f;
-                    //g.DrawRectangle(green, W / 2 - W*w/2, H*top, W*w, H*h);
-                    g.DrawLine(green, W / 2 - W * w / 2, H * top + H * h, W / 2 + W * w / 2, H * top + H * h);
-                    g.DrawLine(green, W / 2 - W * w / 2, H * top + H * h, W / 2 - W * w / 2, H * top);
-                    g.DrawLine(green, W / 2 + W * w / 2, H * top + H * h, W / 2 + W * w / 2, H * top);
-                    g.DrawRectangle(green, W / 2 - 3 * fontWidth / 2, H * top + H * h - fontBottom - fontHeight, 3 * fontWidth, fontHeight);
-                    g.DrawLine(green, W / 2 - fontWidth, H * top + H * h - fontBottom, W / 2, H * h + H * top);
-                    g.DrawLine(green, W / 2 + fontWidth, H * top + H * h - fontBottom, W / 2, H * h + H * top);
-                    g.DrawString(((int)hdg).ToString("000"), f, Brushes.Green, W / 2 - 3 * fontWidth / 2, H * top + H * h - fontBottom - fontHeight);
-
-                    float hudFov = hfov * w;
-                    float closestAngle = (float)Math.Round(hdg / 10.0)*10f;
-                    float smallestAngle = (float)Math.Floor((closestAngle - hudFov) / 10) * 10f;
-                    smallestAngle = ((smallestAngle%360)+360)% 360;
-                    float biggestAngle = (float)Math.Ceiling((closestAngle + hudFov) / 10) * 10f;
-                    biggestAngle = ((biggestAngle % 360) + 360) % 360;
-                    for (float angle = smallestAngle; angle < biggestAngle; angle += 10)
-                    {
-                        float x = W / 2 + (angle - hdg) / hudFov * W * w;
-                        x %= 360 / hfov * W;
-                        if (x > W / 2 - fontWidth * 2f && x < W / 2 + fontWidth * 2f)
-                        {
-                            g.DrawLine(green, x, H * h + H * top, x, H * h + H * top - fontBottom);
-                            continue;
-                        }
-                        if (x < W / 2 - W * w / 2 || x > W / 2 + W * w / 2) continue;
-                        if (angle % 90 == 0) g.DrawLine(green, x, H * h + H * top, x, H * h + H * top - bigLine);
-                        else g.DrawLine(green, x, H * h + H * top, x, H * h + H * top - smallLine);
-                        if (x < W / 2 - W * w / 2 + g.MeasureString(angle.ToString(), f).Width / 2) continue;
-                        if (x > W / 2 + W * w / 2 - g.MeasureString(angle.ToString(), f).Width / 2) continue;
-                        if (x > W / 2 - fontWidth * 2f - g.MeasureString(angle.ToString(), f).Width / 2 && x < W / 2 + fontWidth * 2f + g.MeasureString(angle.ToString(), f).Width / 2) continue;
-                        g.DrawString((Math.Round(((angle%360)+360)%360)).ToString(), f, Brushes.Green, x - g.MeasureString(angle.ToString(), f).Width / 2, H * h + H * top - bigLine * 0.8f - g.MeasureString(angle.ToString(), f).Height);
-                    }
-                }
-
-
-                {//ALTITUDE
-                    float alt = x/100f-2;
-                    float w = 0.1f;
-                    float h = 0.7f;
-                    float right = 0.01f;
-                    float fontHeight = 30;
-                    Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
-
-
-                    float anchorX = W - W * w - W * right;
-                    float anchorY = H / 2 - H * h / 2;
-                    g.DrawRectangle(green, anchorX, anchorY, W * w, H * h);
-                    DrawX(anchorX, anchorX);
-
-                    float sizePerMeter = 1f * h;
-                    float step = .1f;
-                    for(float depth = 0; depth < alt+h/2/sizePerMeter; depth += step)
-                    {
-                        if (depth < alt - h / 2 / sizePerMeter) continue;
-                        float y = H / 2 + H * (depth - alt) * sizePerMeter;
-                        g.DrawLine(green, anchorX, y, anchorX + 10, y);
-                        g.DrawString(depth.ToString("0.0"), f, Brushes.Green, anchorX + 10, y - g.MeasureString(depth.ToString(), f).Height/2f);
-
-                    }
-
-                    g.DrawRectangle(green, anchorX+9, H / 2 - fontHeight/2, g.MeasureString("0.00", f).Width, fontHeight);
-                    g.FillRectangle(Brushes.Black, anchorX+9, H / 2 - fontHeight/2, g.MeasureString("0.00", f).Width, fontHeight);
-                    g.DrawString(alt.ToString("0.0"), f, Brushes.Green, anchorX + 9, H / 2 - 12);
-
-                }
-
-                {//LADDER
-                    float roll = x - 180;
-                    float pitch = y-180;
-                    float cos = (float)+Math.Cos(ToRadians(roll));
-                    float sin = (float)-Math.Sin(ToRadians(roll));
-                    DrawX(W / 2, H / 2);
-                    
-
-
-                    PointF GetRotated(PointF p_) => new PointF(W/2 + p_.X * cos - p_.Y * sin, H/2+p_.X * sin + p_.Y * cos);
-                    void DrawLadderStep(float value_, float width_)
-                    {
-                        g.DrawLine(green, GetRotated(new PointF(-width_/2, value_)), GetRotated(new PointF(width_/2, value_)));
-                    }
-                }
-
-                {//ROLL
-                    float roll = x-180;
-                    float bottom = 0.1f;
-                    float r = 0.5f - bottom; // vertical
-                    float centerX = W / 2;
-                    float centerY = H/2;
-                    float fontHeight = 30;
-                    Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
-
-                    float angleVisible = 90;
-                    g.DrawArc(green, W / 2 - H * r,H/2- H*r, 2*H*r, 2*H*r, 90-angleVisible/2, angleVisible);
-                   
-                    float bigLine = 30;
-                    float smallLine = bigLine*0.6f;
-                    for (float angle = -180; angle < 180; angle += 10)
-                    {
-                        if ((270 - roll + angle+360)%360 < 270- angleVisible/2) continue;
-                        if ((270 - roll + angle+360)%360 > 270+ angleVisible/2) continue;
-                        float lineLen = angle % 90 == 0 ? bigLine : smallLine;
-                        if(angle < 0)
-                        {
-                            DrawLineOnArc(centerX, centerY, 270 + roll - angle, H * r + lineLen * 0.0f, H * r + lineLen * 0.2f);
-                            DrawLineOnArc(centerX, centerY, 270 + roll - angle, H * r + lineLen * 0.4f, H * r + lineLen * 0.6f);
-                            DrawLineOnArc(centerX, centerY, 270 + roll - angle, H * r + lineLen * 0.8f, H * r + lineLen * 1.0f);
-                        }
-                        else if(angle == 0) DrawLineOnArcBold(centerX, centerY, 270 + roll - angle, H * r- lineLen/4, H * r+ lineLen);
-                        else DrawLineOnArc(centerX, centerY, 270 + roll - angle, H * r, H * r+ lineLen);
-                        float stringX = W/2+(float)Math.Cos(ToRadians(270 + roll - angle)) * (H * r + fontHeight/2+ bigLine);
-                        float stringY = H/2-(float)Math.Sin(ToRadians(270 + roll - angle)) * (H * r+ fontHeight/2 + bigLine);
-                        g.DrawString(Math.Abs(angle).ToString(), f, Brushes.Green, stringX - g.MeasureString(Math.Abs(angle).ToString(), f).Width / 2, stringY - g.MeasureString(Math.Abs(angle).ToString(), f).Height / 2);
-                        
-                    }
-
-                    g.FillRectangle(Brushes.Black, W / 2 - g.MeasureString("-180", f).Width / 2, H - 40, g.MeasureString("-180", f).Width, 30);
-                    g.DrawRectangle(green, W / 2 - g.MeasureString("-180", f).Width/2, H - 40, g.MeasureString("-180", f).Width, 30);
-                    g.DrawString(roll.ToString(" 000;-000"), f, Brushes.Green, W / 2 - g.MeasureString("-180", f).Width / 2, H - 40);
-
-                }
-
-
-                double ToRadians(float a_) => (float)(a_*Math.PI/180.0);
-                void DrawX(float x, float y) { g.DrawEllipse(Pens.Magenta, x - 4, y - 4, 8, 8); }
-                void DrawLineOnArc(float x_, float y_, float a_, float s_, float e_)
+                int start = DateTime.Now.Millisecond;
+                int W = pictureBox1.Width;
+                int H = pictureBox1.Height;
+                Bitmap b = new Bitmap(W, H);
+                using (Graphics g = Graphics.FromImage(b))
                 {
-                    a_ *= (float)Math.PI / 180.0f;
-                    g.DrawLine(green, x_ + (float)(Math.Cos(a_) * s_), y_ - (float)(Math.Sin(a_) * s_), x_ + (float)(Math.Cos(a_) * (e_)), y_ - (float)(Math.Sin(a_) * e_));
+                    g.FillRectangle(Brushes.Black, 0, 0, W, H);
+                    //g.DrawLine(Pens.Green, 0, H / 2, W, H / 2);
+                    // g.DrawLine(Pens.Green, W/2, 0, W/2, H);
+                    Pen green = new Pen(Brushes.Red, 3);
+
+                    {//HEADING
+                        float w = 0.5f;
+                        float h = 0.06f;
+                        float hfov = 91.5f; //horizontal fov
+                        float fontHeight = 20;
+                        Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
+                        float fontWidth = g.MeasureString("000", f).Width / 3;
+                        float fontBottom = H * h * 0.3f;
+                        float hdg = sens.gyro.y;//(float)( ( 30+90*Math.Sin(time*0.1) )%360 );
+                                                //if (hdg < 0) hdg += 360f;
+                        float top = 0.01f;
+                        float smallLine = H * h * 0.3f;
+                        float bigLine = H * h * 0.5f;
+                        //g.DrawRectangle(green, W / 2 - W*w/2, H*top, W*w, H*h);
+                        g.DrawLine(green, W / 2 - W * w / 2, H * top + H * h, W / 2 + W * w / 2, H * top + H * h);
+                        g.DrawLine(green, W / 2 - W * w / 2, H * top + H * h, W / 2 - W * w / 2, H * top);
+                        g.DrawLine(green, W / 2 + W * w / 2, H * top + H * h, W / 2 + W * w / 2, H * top);
+                        g.DrawRectangle(green, W / 2 - 3 * fontWidth / 2, H * top + H * h - fontBottom - fontHeight, 3 * fontWidth, fontHeight);
+                        g.DrawLine(green, W / 2 - fontWidth, H * top + H * h - fontBottom, W / 2, H * h + H * top);
+                        g.DrawLine(green, W / 2 + fontWidth, H * top + H * h - fontBottom, W / 2, H * h + H * top);
+                        g.DrawString(((int)hdg).ToString("000"), f, Brushes.Red, W / 2 - 3 * fontWidth / 2, H * top + H * h - fontBottom - fontHeight);
+
+                        float hudFov = hfov * w;
+                        float closestAngle = (float)Math.Round(hdg / 10.0) * 10f;
+                        float smallestAngle = (float)Math.Floor((closestAngle - hudFov) / 10) * 10f;
+                        smallestAngle = ((smallestAngle % 360) + 360) % 360;
+                        float biggestAngle = (float)Math.Ceiling((closestAngle + hudFov) / 10) * 10f;
+                        biggestAngle = ((biggestAngle % 360) + 360) % 360;
+                        for (float angle = smallestAngle; angle < biggestAngle; angle += 10)
+                        {
+                            float x = W / 2 + (angle - hdg) / hudFov * W * w;
+                            x %= 360 / hfov * W;
+                            if (x > W / 2 - fontWidth * 2f && x < W / 2 + fontWidth * 2f)
+                            {
+                                g.DrawLine(green, x, H * h + H * top, x, H * h + H * top - fontBottom);
+                                continue;
+                            }
+                            if (x < W / 2 - W * w / 2 || x > W / 2 + W * w / 2) continue;
+                            if (angle % 90 == 0) g.DrawLine(green, x, H * h + H * top, x, H * h + H * top - bigLine);
+                            else g.DrawLine(green, x, H * h + H * top, x, H * h + H * top - smallLine);
+                            if (x < W / 2 - W * w / 2 + g.MeasureString(angle.ToString(), f).Width / 2) continue;
+                            if (x > W / 2 + W * w / 2 - g.MeasureString(angle.ToString(), f).Width / 2) continue;
+                            if (x > W / 2 - fontWidth * 2f - g.MeasureString(angle.ToString(), f).Width / 2 && x < W / 2 + fontWidth * 2f + g.MeasureString(angle.ToString(), f).Width / 2) continue;
+                            g.DrawString((Math.Round(((angle % 360) + 360) % 360)).ToString(), f, Brushes.Red, x - g.MeasureString(angle.ToString(), f).Width / 2, H * h + H * top - bigLine * 0.8f - g.MeasureString(angle.ToString(), f).Height);
+                        }
+                    }
+
+                    {//HEADING
+                        float w = 0.5f;
+                        float h = 0.06f;
+
+
+                        float hdg;
+                        float hfov = 91.5f;
+                    }
+
+
+
+                    {//ALTITUDE
+                        float alt = sens.baro.pressure / 1000f / 9.81f;
+                        float w = 0.1f;
+                        float h = 0.7f;
+                        float right = 0.01f;
+                        float fontHeight = 30;
+                        Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
+
+
+                        float anchorX = W - W * w - W * right;
+                        float anchorY = H / 2 - H * h / 2;
+                        g.DrawRectangle(green, anchorX, anchorY, W * w, H * h);
+                        DrawX(anchorX, anchorX);
+
+                        float sizePerMeter = 1f * h;
+                        float step = .1f;
+                        for (float depth = 0; depth < alt + h / 2 / sizePerMeter; depth += step)
+                        {
+                            if (depth < alt - h / 2 / sizePerMeter) continue;
+                            float y = H / 2 + H * (depth - alt) * sizePerMeter;
+                            g.DrawLine(green, anchorX, y, anchorX + 10, y);
+                            g.DrawString(depth.ToString("0.0"), f, Brushes.Red, anchorX + 10, y - g.MeasureString(depth.ToString(), f).Height / 2f);
+
+                        }
+
+                        g.DrawRectangle(green, anchorX + 9, H / 2 - fontHeight / 2, g.MeasureString("0.00", f).Width, fontHeight);
+                        g.FillRectangle(Brushes.Black, anchorX + 9, H / 2 - fontHeight / 2, g.MeasureString("0.00", f).Width, fontHeight);
+                        g.DrawString(alt.ToString("0.0"), f, Brushes.Red, anchorX + 9, H / 2 - 12);
+
+                    }
+
+                    {//LADDER
+                        float roll = sens.gyro.z;
+                        float pitch = sens.gyro.x;
+                        float cos = (float)+Math.Cos(ToRadians(roll));
+                        float sin = (float)-Math.Sin(ToRadians(roll));
+                        DrawX(W / 2, H / 2);
+
+
+
+                        PointF GetRotated(PointF p_) => new PointF(W / 2 + p_.X * cos - p_.Y * sin, H / 2 + p_.X * sin + p_.Y * cos);
+                        void DrawLadderStep(float value_, float width_)
+                        {
+                            g.DrawLine(green, GetRotated(new PointF(-width_ / 2, value_)), GetRotated(new PointF(width_ / 2, value_)));
+                        }
+                    }
+
+                    {//ROLL
+                        float roll = sens.gyro.z;
+                        float bottom = 0.1f;
+                        float r = 0.5f - bottom; // vertical
+                        float centerX = W / 2;
+                        float centerY = H / 2;
+                        float fontHeight = 30;
+                        Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
+
+                        float angleVisible = 90;
+                        g.DrawArc(green, W / 2 - H * r, H / 2 - H * r, 2 * H * r, 2 * H * r, 90 - angleVisible / 2, angleVisible);
+
+                        float bigLine = 30;
+                        float smallLine = bigLine * 0.6f;
+                        for (float angle = -180; angle < 180; angle += 10)
+                        {
+                            if ((270 - roll + angle + 360) % 360 < 270 - angleVisible / 2) continue;
+                            if ((270 - roll + angle + 360) % 360 > 270 + angleVisible / 2) continue;
+                            float lineLen = angle % 90 == 0 ? bigLine : smallLine;
+                            if (angle < 0)
+                            {
+                                DrawLineOnArc(centerX, centerY, 270 + roll - angle, H * r + lineLen * 0.0f, H * r + lineLen * 0.2f);
+                                DrawLineOnArc(centerX, centerY, 270 + roll - angle, H * r + lineLen * 0.4f, H * r + lineLen * 0.6f);
+                                DrawLineOnArc(centerX, centerY, 270 + roll - angle, H * r + lineLen * 0.8f, H * r + lineLen * 1.0f);
+                            }
+                            else if (angle == 0) DrawLineOnArcBold(centerX, centerY, 270 + roll - angle, H * r - lineLen / 4, H * r + lineLen);
+                            else DrawLineOnArc(centerX, centerY, 270 + roll - angle, H * r, H * r + lineLen);
+                            float stringX = W / 2 + (float)Math.Cos(ToRadians(270 + roll - angle)) * (H * r + fontHeight / 2 + bigLine);
+                            float stringY = H / 2 - (float)Math.Sin(ToRadians(270 + roll - angle)) * (H * r + fontHeight / 2 + bigLine);
+                            g.DrawString(Math.Abs(angle).ToString(), f, Brushes.Red, stringX - g.MeasureString(Math.Abs(angle).ToString(), f).Width / 2, stringY - g.MeasureString(Math.Abs(angle).ToString(), f).Height / 2);
+
+                        }
+
+                        g.FillRectangle(Brushes.Black, W / 2 - g.MeasureString("-180", f).Width / 2, H - 40, g.MeasureString("-180", f).Width, 30);
+                        g.DrawRectangle(green, W / 2 - g.MeasureString("-180", f).Width / 2, H - 40, g.MeasureString("-180", f).Width, 30);
+                        g.DrawString(roll.ToString(" 000;-000"), f, Brushes.Red, W / 2 - g.MeasureString("-180", f).Width / 2, H - 40);
+
+                    }
+
+
+                    double ToRadians(float a_) => (float)(a_ * Math.PI / 180.0);
+                    void DrawX(float x, float y) { g.DrawEllipse(Pens.Magenta, x - 4, y - 4, 8, 8); }
+                    void DrawLineOnArc(float x_, float y_, float a_, float s_, float e_)
+                    {
+                        a_ *= (float)Math.PI / 180.0f;
+                        g.DrawLine(green, x_ + (float)(Math.Cos(a_) * s_), y_ - (float)(Math.Sin(a_) * s_), x_ + (float)(Math.Cos(a_) * (e_)), y_ - (float)(Math.Sin(a_) * e_));
+                    }
+                    void DrawLineOnArcBold(float x_, float y_, float a_, float s_, float e_)
+                    {
+                        Pen newPen = new Pen(green.Brush, green.Width * 2);
+                        newPen.Width = green.Width * 2;
+                        a_ *= (float)Math.PI / 180.0f;
+                        g.DrawLine(newPen, x_ + (float)(Math.Cos(a_) * s_), y_ - (float)(Math.Sin(a_) * s_), x_ + (float)(Math.Cos(a_) * (e_)), y_ - (float)(Math.Sin(a_) * e_));
+                    }
                 }
-                void DrawLineOnArcBold(float x_, float y_, float a_, float s_, float e_)
-                {
-                    Pen newPen = new Pen(green.Brush, green.Width * 2);
-                    newPen.Width = green.Width*2;
-                    a_ *= (float)Math.PI / 180.0f;
-                    g.DrawLine(newPen, x_ + (float)(Math.Cos(a_) * s_), y_ - (float)(Math.Sin(a_) * s_), x_ + (float)(Math.Cos(a_) * (e_)), y_ - (float)(Math.Sin(a_) * e_));
-                }
+
+
+
+                Image img = picHUD.Image;
+                b.MakeTransparent();
+                pictureBox1.Controls.Add(picHUD);
+                picHUD.BackColor = Color.Transparent;
+                picHUD.Image = b;
+                if (img != null) img.Dispose();
+
+
+                time += 0.1;
+
+
+                int elapsed = DateTime.Now.Millisecond - start;
+                //Text = elapsed.ToString() ;
             }
-            Image img = pictureBox1.Image;
-            pictureBox1.Image = b;
-            if (img != null) img.Dispose();
-
-            // pictureBox1.Invalidate();
-            time+=0.1;
-
-
-            int elapsed = DateTime.Now.Millisecond - start;
-            //Text = elapsed.ToString() ;
+            catch { }
+            if(okonClient != null && okonClient.IsConnected())okonClient.SendString((byte)Packet.GET_SENS, (byte)Flag.DO_NOT_LOG_PACKET, "");
         }
-        int x = 0;
-        int y = 0;
-        private void trackBar1_Scroll(object sender, EventArgs e)
-        {
-            x = trackBar1.Value;
-        }
-        private void trackBar2_Scroll(object sender, EventArgs e)
-        {
-            x = trackBar1.Value;
-        }
+    }
+    public class Sensors
+    {
+        public Gyro gyro = new Gyro();
+        public Rot_speed rot_speed = new Rot_speed();
+        public Accel accel = new Accel();
+        public Angular_accel angular_accel = new Angular_accel();
+        public Baro baro = new Baro();
+    }
+
+    public class Gyro
+    {
+        public float x, y, z;
+    }
+
+    public class Accel
+    {
+        public float x, y, z;
+    }
+
+    public class Rot_speed
+    {
+        public float x, y, z;
+    }
+
+    public class Angular_accel
+    {
+        public float x, y, z;
+    }
+
+    public class Baro
+    {
+        public float pressure;
     }
 }
 

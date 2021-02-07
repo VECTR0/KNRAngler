@@ -36,13 +36,11 @@
             this.btnShowSettings = new System.Windows.Forms.Button();
             this.btnShowConsole = new System.Windows.Forms.Button();
             this.tmrFramerate = new System.Windows.Forms.Timer(this.components);
-            this.trackBar1 = new System.Windows.Forms.TrackBar();
             this.tmrHUD = new System.Windows.Forms.Timer(this.components);
-            this.trackBar2 = new System.Windows.Forms.TrackBar();
+            this.picHUD = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picDepthMap)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picHUD)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -106,41 +104,30 @@
             this.tmrFramerate.Interval = 1000;
             this.tmrFramerate.Tick += new System.EventHandler(this.tmrFramerate_Tick_1);
             // 
-            // trackBar1
-            // 
-            this.trackBar1.Location = new System.Drawing.Point(25, 215);
-            this.trackBar1.Maximum = 360;
-            this.trackBar1.Name = "trackBar1";
-            this.trackBar1.Size = new System.Drawing.Size(671, 45);
-            this.trackBar1.TabIndex = 35;
-            this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
-            // 
             // tmrHUD
             // 
             this.tmrHUD.Enabled = true;
             this.tmrHUD.Interval = 10;
             this.tmrHUD.Tick += new System.EventHandler(this.tmrHUD_Tick);
             // 
-            // trackBar2
+            // picHUD
             // 
-            this.trackBar2.Location = new System.Drawing.Point(25, 266);
-            this.trackBar2.Maximum = 360;
-            this.trackBar2.Name = "trackBar2";
-            this.trackBar2.Size = new System.Drawing.Size(671, 45);
-            this.trackBar2.TabIndex = 35;
-            this.trackBar2.Scroll += new System.EventHandler(this.trackBar2_Scroll);
+            this.picHUD.Location = new System.Drawing.Point(0, 0);
+            this.picHUD.Name = "picHUD";
+            this.picHUD.Size = new System.Drawing.Size(960, 537);
+            this.picHUD.TabIndex = 36;
+            this.picHUD.TabStop = false;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(960, 540);
-            this.Controls.Add(this.trackBar2);
-            this.Controls.Add(this.trackBar1);
             this.Controls.Add(this.btnShowConsole);
             this.Controls.Add(this.btnShowSettings);
-            this.Controls.Add(this.picDepthMap);
             this.Controls.Add(this.lblFrameRate);
+            this.Controls.Add(this.picDepthMap);
+            this.Controls.Add(this.picHUD);
             this.Controls.Add(this.pictureBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.KeyPreview = true;
@@ -151,8 +138,7 @@
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picDepthMap)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picHUD)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -166,9 +152,8 @@
         public System.Windows.Forms.Button btnShowSettings;
         public System.Windows.Forms.Button btnShowConsole;
         private System.Windows.Forms.Timer tmrFramerate;
-        private System.Windows.Forms.TrackBar trackBar1;
         private System.Windows.Forms.Timer tmrHUD;
-        private System.Windows.Forms.TrackBar trackBar2;
+        private System.Windows.Forms.PictureBox picHUD;
     }
 }
 
