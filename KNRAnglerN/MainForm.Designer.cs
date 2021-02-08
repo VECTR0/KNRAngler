@@ -107,7 +107,7 @@
             // tmrHUD
             // 
             this.tmrHUD.Enabled = true;
-            this.tmrHUD.Interval = 10;
+            this.tmrHUD.Interval = 5;
             this.tmrHUD.Tick += new System.EventHandler(this.tmrHUD_Tick);
             // 
             // picHUD
