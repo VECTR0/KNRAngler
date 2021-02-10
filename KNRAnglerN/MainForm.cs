@@ -370,13 +370,22 @@ namespace KNRAnglerN
                 }
 
                 {//LADDER
+                    float vfov = 60f;
                     float roll = sens.gyro.z;
                     float pitch = sens.gyro.x;
-                    float cos = (float)+Math.Cos(ToRadians(roll));
-                    float sin = (float)-Math.Sin(ToRadians(roll));
+                    float cos = (float)+Math.Cos(ToRadians(-roll));
+                    float sin = (float)-Math.Sin(ToRadians(-roll));
                     DrawX(W / 2, H / 2);
 
-
+                    for (float angle = -180; angle < 180; angle += 10)
+                    {
+                        float y = (angle - pitch) / vfov * H;
+                        if (y > H / 2 + 180f / vfov * H) y -= 360f / vfov * H;
+                        if (y < H / 2 - 180f / vfov * H) y += 360f / vfov * H;
+                        if(angle == 0) DrawLadderStep(y, 500);
+                        else if(angle % 90 == 0) DrawLadderStep(y, 200);
+                        else DrawLadderStep(y, 100);
+                    }
 
                     PointF GetRotated(PointF p_) => new PointF(W / 2 + p_.X * cos - p_.Y * sin, H / 2 + p_.X * sin + p_.Y * cos);
                     void DrawLadderStep(float value_, float width_)
