@@ -143,7 +143,7 @@ namespace KNRAnglerN
                     consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + Encoding.ASCII.GetString(e.packetData, 0, e.packetData.Length);
                     break;
             }
-        }
+        }   
 
         private void tmrFrameRate_Tick(object sender, EventArgs e)
         {
@@ -382,9 +382,18 @@ namespace KNRAnglerN
                         float y = (angle - pitch) / vfov * H;
                         if (y > H / 2 + 180f / vfov * H) y -= 360f / vfov * H;
                         if (y < H / 2 - 180f / vfov * H) y += 360f / vfov * H;
-                        if(angle == 0) DrawLadderStep(y, 500);
-                        else if(angle % 90 == 0) DrawLadderStep(y, 200);
-                        else DrawLadderStep(y, 100);
+                        if (angle == 0)
+                        {//HORIZONT
+                            DrawLadderStep(y, 500);
+                        }
+                        else if (angle % 90 == 0)
+                        {//+-90deg
+                            DrawLadderStep(y, 200);
+                        }
+                        else
+                        {
+                            DrawLadderStep(y, 100);
+                        }
                     }
 
                     PointF GetRotated(PointF p_) => new PointF(W / 2 + p_.X * cos - p_.Y * sin, H / 2 + p_.X * sin + p_.Y * cos);
