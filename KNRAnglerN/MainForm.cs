@@ -400,6 +400,17 @@ namespace KNRAnglerN
                     void DrawLadderStep(float value_, float width_)
                     {
                         g.DrawLine(green, GetRotated(new PointF(-width_ / 2, value_)), GetRotated(new PointF(width_ / 2, value_)));
+                        //text
+                    }
+
+                    void DrawHorizont(float value_, float width_)
+                    {
+                        g.DrawLine(green, GetRotated(new PointF(-width_ / 2, value_)), GetRotated(new PointF(width_ / 2, value_)));
+                    }
+
+                    void DrawNegativeLadderStep(float value_, float width_)
+                    {
+                        g.DrawLine(green, GetRotated(new PointF(-width_ / 2, value_)), GetRotated(new PointF(width_ / 2, value_)));
                     }
                 }
 
