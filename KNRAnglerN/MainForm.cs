@@ -265,6 +265,97 @@ namespace KNRAnglerN
                 Pen green = new Pen(Brushes.Red, 3);
                 Pen debug = new Pen(Brushes.Aquamarine, 1);
 
+                {//LADDER
+                    float w = 0.5f;
+                    float wLadder = 0.5f;
+                    float wHorizont = 1.5f;
+                    float vfov = 60f;
+                    float roll = sens.gyro.z;
+                    float pitch = sens.gyro.x;
+                    float cos = (float)+Math.Cos(ToRadians(-roll));
+                    float sin = (float)-Math.Sin(ToRadians(-roll));
+                    float fontHeight = 20;
+                    Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);//g.MeasureString("0.00", f).Width
+
+                    DrawX(W / 2, H / 2);
+
+                    for (float angle = -90; angle <= 90; angle += 10)
+                    {
+                        float y = (angle + pitch) / vfov * H;
+                        if (y > H / 2 + 180f / vfov * H) y -= 360f / vfov * H;
+                        if (y < H / 2 - 180f / vfov * H) y += 360f / vfov * H;
+                        if (angle == 0)
+                        {//HORIZONT
+                            DrawHorizont(y, W * w * wHorizont, 0.1f);
+                        }
+                        else
+                        {
+                            if (angle % 90 == 0)
+                            {//+-90deg
+                                DrawLadderStep(y, W * w * wLadder * 1.1f, 0.4f, angle);
+                            }
+                            else
+                            {
+                                if (angle > 0)
+                                {
+                                    DrawLadderStep(y, W * w * wLadder, 0.4f, angle);
+                                }
+                                else
+                                {
+                                    DrawNegativeLadderStep(y, W * w * wLadder, 0.4f, angle);
+                                }
+
+                            }
+                        }
+                    }
+                    
+                    /*{//DRAW XY CORDS
+                        g.DrawLine(Pens.Lime, GetRotated(new PointF(0, 100)), GetRotated(new PointF(0, 0)));
+                        g.DrawLine(Pens.Pink, GetRotated(new PointF(100, 0)), GetRotated(new PointF(0, 0)));
+                    }*/
+
+                    PointF GetRotated(PointF p_) => new PointF(W / 2 + p_.X * cos + p_.Y * sin, H / 2 + p_.X * sin - p_.Y * cos);
+                    void DrawLadderStep(float value_, float width_, float hole, float angle)
+                    {
+                        g.DrawLine(green, GetRotated(new PointF(-width_ / 2, value_)), GetRotated(new PointF(-width_ * hole / 2, value_)));
+                        g.DrawLine(green, GetRotated(new PointF(width_ * hole / 2, value_)), GetRotated(new PointF(width_ / 2, value_)));
+                        g.DrawLine(green, GetRotated(new PointF(-width_ * hole / 2, value_ - 15)), GetRotated(new PointF(-width_ * hole / 2, value_)));
+                        g.DrawLine(green, GetRotated(new PointF(width_ * hole / 2, value_ - 15)), GetRotated(new PointF(width_ * hole / 2, value_)));
+
+                        var textRight = GetRotated(new PointF(width_ / 2 + g.MeasureString("00", f).Width / 2, value_));
+                        g.DrawString(angle.ToString(), f, Brushes.Red, textRight.X - g.MeasureString("00", f).Width/2, textRight.Y - g.MeasureString("00", f).Height/2);
+                        var textLeft = GetRotated(new PointF(-(width_ / 2 + g.MeasureString("00", f).Width / 2), value_));
+                        g.DrawString(angle.ToString(), f, Brushes.Red, textLeft.X - g.MeasureString("00", f).Width/2, textLeft.Y - g.MeasureString("00", f).Height/2);
+                    }
+
+                    void DrawHorizont(float value_, float width_, float hole)
+                    {
+                        g.DrawLine(green, GetRotated(new PointF(-width_ / 2, value_)), GetRotated(new PointF(-width_ * hole / 2, value_)));
+                        g.DrawLine(green, GetRotated(new PointF(width_ * hole / 2, value_)), GetRotated(new PointF(width_ / 2, value_)));
+                    }
+
+                    void DrawNegativeLadderStep(float value_, float width_, float hole, float angle)
+                    {
+                        angle = angle > 0 ? angle : -angle;
+                        float line = (width_ - width_ * hole) / 2;
+                        float max = width_ / 2;
+                        g.DrawLine(green, GetRotated(new PointF(max - line*0.2f, value_)), GetRotated(new PointF(max, value_)));
+                        g.DrawLine(green, GetRotated(new PointF(max - line*0.6f, value_)), GetRotated(new PointF(max - line * 0.4f, value_)));
+                        g.DrawLine(green, GetRotated(new PointF(max - line, value_)), GetRotated(new PointF(max - line * 0.8f, value_)));
+                        g.DrawLine(green, GetRotated(new PointF(-max + line*0.2f, value_)), GetRotated(new PointF(-max, value_)));
+                        g.DrawLine(green, GetRotated(new PointF(-max + line*0.6f, value_)), GetRotated(new PointF(-max + line * 0.4f, value_)));
+                        g.DrawLine(green, GetRotated(new PointF(-max + line, value_)), GetRotated(new PointF(-max + line * 0.8f, value_)));
+                        
+                        g.DrawLine(green, GetRotated(new PointF(-width_ * hole / 2, value_ + 15)), GetRotated(new PointF(-width_ * hole / 2, value_)));
+                        g.DrawLine(green, GetRotated(new PointF(width_ * hole / 2, value_ + 15)), GetRotated(new PointF(width_ * hole / 2, value_)));
+                        
+                        var textRight = GetRotated(new PointF(width_ / 2 + g.MeasureString("00", f).Width / 2, value_));
+                        g.DrawString(angle.ToString(), f, Brushes.Red, textRight.X - g.MeasureString("00", f).Width / 2, textRight.Y - g.MeasureString("00", f).Height / 2);
+                        var textLeft = GetRotated(new PointF(-(width_ / 2 + g.MeasureString("00", f).Width / 2), value_));
+                        g.DrawString(angle.ToString(), f, Brushes.Red, textLeft.X - g.MeasureString("00", f).Width / 2, textLeft.Y - g.MeasureString("00", f).Height / 2);
+
+                    }
+                }
 
                 {//HEADING\
                     float w = 0.5f;
@@ -275,6 +366,7 @@ namespace KNRAnglerN
                     float anchorX = W/2 - W * w / 2;
                     float anchorY = H*top;
 
+                    g.FillRectangle(Brushes.Black, anchorX, anchorY, W*w, H*h);
                     //g.DrawRectangle(debug, anchorX, anchorY, W * w, H * h);
                     g.DrawLine(green, anchorX, anchorY + H*h, anchorX + W*w, anchorY+H*h);
 
@@ -346,6 +438,7 @@ namespace KNRAnglerN
 
                     float anchorX = W - W * w - W * right;
                     float anchorY = H / 2 - H * h / 2;
+                    g.FillRectangle(Brushes.Black, anchorX, anchorY, W * w, H * h);
                     //g.DrawRectangle(green, anchorX, anchorY, W * w, H * h);
                     g.DrawLine(green, anchorX, anchorY, anchorX, anchorY + H * h);
                     DrawX(anchorX, anchorX);
@@ -369,65 +462,7 @@ namespace KNRAnglerN
 
                 }
 
-                {//LADDER
-                    float w = 0.5f;
-                    float wLadder = 0.5f;
-                    float vfov = 60f;
-                    float roll = sens.gyro.z;
-                    float pitch = sens.gyro.x;
-                    float cos = (float)+Math.Cos(ToRadians(-roll));
-                    float sin = (float)-Math.Sin(ToRadians(-roll));
-                    DrawX(W / 2, H / 2);
-
-                    for (float angle = -180; angle < 180; angle += 10)
-                    {
-                        float y = (angle - pitch) / vfov * H;
-                        if (y > H / 2 + 180f / vfov * H) y -= 360f / vfov * H;
-                        if (y < H / 2 - 180f / vfov * H) y += 360f / vfov * H;
-                        if (angle == 0)
-                        {//HORIZONT
-                            DrawHorizont(y, W * w, 0.1f);
-                        }
-                        else
-                        {
-                            if (angle % 90 == 0)
-                            {//+-90deg
-                                DrawLadderStep(y, W * w * wLadder*1.1f, 0.4f);
-                            }
-                            else
-                            {
-                                if(angle > 0)
-                                {
-                                    DrawLadderStep(y, W * w * wLadder, 0.4f);
-                                }
-                                else
-                                {
-                                    DrawNegativeLadderStep(y, W * w * wLadder, 0.4f);
-                                }
-                                
-                            }
-                        }
-                    }
-
-                    PointF GetRotated(PointF p_) => new PointF(W / 2 + p_.X * cos - p_.Y * sin, H / 2 + p_.X * sin + p_.Y * cos);
-                    void DrawLadderStep(float value_, float width_, float hole)
-                    {
-                        g.DrawLine(green, GetRotated(new PointF(-width_ / 2, value_)), GetRotated(new PointF(-width_ * hole / 2, value_)));
-                        g.DrawLine(green, GetRotated(new PointF(width_ * hole / 2, value_)), GetRotated(new PointF(width_ / 2, value_)));
-                    }
-
-                    void DrawHorizont(float value_, float width_, float hole)
-                    {
-                        g.DrawLine(green, GetRotated(new PointF(-width_ / 2, value_)), GetRotated(new PointF(-width_*hole/2, value_)));
-                        g.DrawLine(green, GetRotated(new PointF(width_ * hole/2, value_)), GetRotated(new PointF(width_ / 2, value_)));
-                    }
-
-                    void DrawNegativeLadderStep(float value_, float width_, float hole)
-                    {
-                        g.DrawLine(green, GetRotated(new PointF(-width_ / 2, value_)), GetRotated(new PointF(-width_ * hole / 2, value_)));
-                        g.DrawLine(green, GetRotated(new PointF(width_ * hole / 2, value_)), GetRotated(new PointF(width_ / 2, value_)));
-                    }
-                }
+                
 
                 {//ROLL
                     float roll = sens.gyro.z;
@@ -437,7 +472,7 @@ namespace KNRAnglerN
                     float centerY = H / 2;
                     float fontHeight = 30;
                     Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
-
+                   
                     float angleVisible = 90;
                     g.DrawArc(green, W / 2 - H * r, H / 2 - H * r, 2 * H * r, 2 * H * r, 90 - angleVisible / 2, angleVisible);
 
@@ -478,6 +513,8 @@ namespace KNRAnglerN
                     float anchorX = W * x;
                     float anchorY = H * y;
 
+
+                    g.FillRectangle(Brushes.Black, anchorX, anchorY, W * w, H * h);
                     g.DrawRectangle(green, anchorX, anchorY, W * w, H * h);
                     g.FillRectangle(Brushes.Red, anchorX, anchorY, W * w*fill, H * h);
 
