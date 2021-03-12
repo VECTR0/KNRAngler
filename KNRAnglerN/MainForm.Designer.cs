@@ -38,6 +38,7 @@
             this.tmrFramerate = new System.Windows.Forms.Timer(this.components);
             this.tmrHUD = new System.Windows.Forms.Timer(this.components);
             this.picHUD = new System.Windows.Forms.PictureBox();
+            this.btnShowCloud = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picDepthMap)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picHUD)).BeginInit();
@@ -118,11 +119,22 @@
             this.picHUD.TabIndex = 36;
             this.picHUD.TabStop = false;
             // 
+            // btnShowCloud
+            // 
+            this.btnShowCloud.Location = new System.Drawing.Point(717, 514);
+            this.btnShowCloud.Name = "btnShowCloud";
+            this.btnShowCloud.Size = new System.Drawing.Size(76, 23);
+            this.btnShowCloud.TabIndex = 34;
+            this.btnShowCloud.Text = "Cloud";
+            this.btnShowCloud.UseVisualStyleBackColor = true;
+            this.btnShowCloud.Click += new System.EventHandler(this.btnShowCloud_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(960, 540);
+            this.Controls.Add(this.btnShowCloud);
             this.Controls.Add(this.btnShowConsole);
             this.Controls.Add(this.btnShowSettings);
             this.Controls.Add(this.lblFrameRate);
@@ -154,6 +166,7 @@
         private System.Windows.Forms.Timer tmrFramerate;
         private System.Windows.Forms.Timer tmrHUD;
         private System.Windows.Forms.PictureBox picHUD;
+        public System.Windows.Forms.Button btnShowCloud;
     }
 }
 

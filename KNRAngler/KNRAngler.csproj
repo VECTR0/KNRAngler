@@ -78,6 +78,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CloudForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CloudForm.Designer.cs">
+      <DependentUpon>CloudForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KNRAnglerN
 {
     class HUD
     {
-        int width, height;
-        float vFov, hFov;
-        KNRAnglerN.Gyro gyro;
+        public int width, height;
+        public float vFov, hFov;
+        public KNRAnglerN.Gyro gyro;
         public float metersUnderWater;
-        public float batteryFill = 0, batteryVoltage = 14.3f;
-        Dictionary<string, bool> enable = new Dictionary<string, bool>();
+        public float batteryFill = 0.9f, batteryVoltage = 10.1f;
+        private Dictionary<string, bool> enable = new Dictionary<string, bool>();
 
         public HUD(int width, int height, float vFov, float hFov)
         {

@@ -18,6 +18,7 @@ namespace KNRAnglerN
         public const string ver = "7.2";
         public readonly ConsoleForm consoleForm;
         public readonly SettingsForm settingsForm;
+        public readonly CloudForm cloudForm;
         public OkonClient okonClient;
         public int requestedVideoFeedFrames = 0;
         public int requestedDepthMapFrames = 0;
@@ -61,6 +62,7 @@ namespace KNRAnglerN
             consoleForm = new ConsoleForm(this);
             settingsForm = new SettingsForm(this);
             Text = "KNR Wędkarz - Okoń Sim control v" + ver + " by Vectro 2021";
+            cloudForm = new CloudForm(this) { Visible = true};
         }
 
         public class Info : OkonClient.IInfo
@@ -234,6 +236,12 @@ namespace KNRAnglerN
             else consoleForm.Show();
         }
 
+        private void btnShowCloud_Click(object sender, EventArgs e)
+        {
+            if (cloudForm.Visible) cloudForm.Hide();
+            else cloudForm.Show();
+        }
+
         private void tmrFramerate_Tick_1(object sender, EventArgs e)
         {
             lblFrameRate.Text = Math.Round((1000.0 * framesNum / (DateTime.Now.Subtract(framesLastCheck).TotalMilliseconds))).ToString() + "FPS ping " + ping + "ms";
@@ -269,6 +277,8 @@ namespace KNRAnglerN
 
             if (okonClient != null && okonClient.IsConnected()) okonClient.SendString((byte)Packet.GET_SENS, (byte)Flag.DO_NOT_LOG_PACKET, "");
         }
+
+        
     }
     public class Sensors
     {
