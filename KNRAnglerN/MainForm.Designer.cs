@@ -39,6 +39,7 @@
             this.tmrHUD = new System.Windows.Forms.Timer(this.components);
             this.picHUD = new System.Windows.Forms.PictureBox();
             this.btnShowCloud = new System.Windows.Forms.Button();
+            this.tmrGamepad = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picDepthMap)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picHUD)).BeginInit();
@@ -129,6 +130,12 @@
             this.btnShowCloud.UseVisualStyleBackColor = true;
             this.btnShowCloud.Click += new System.EventHandler(this.btnShowCloud_Click);
             // 
+            // tmrGamepad
+            // 
+            this.tmrGamepad.Enabled = true;
+            this.tmrGamepad.Interval = 50;
+            this.tmrGamepad.Tick += new System.EventHandler(this.tmrGamepad_Tick);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -167,6 +174,7 @@
         private System.Windows.Forms.Timer tmrHUD;
         private System.Windows.Forms.PictureBox picHUD;
         public System.Windows.Forms.Button btnShowCloud;
+        private System.Windows.Forms.Timer tmrGamepad;
     }
 }
 

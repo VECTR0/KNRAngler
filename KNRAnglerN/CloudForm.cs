@@ -39,6 +39,15 @@ namespace KNRAnglerN
                 Bitmap c = new Bitmap(instance.pictureBox1.Image);
                 cloud.GenerateFromDepthMap(d, c, 91.49284f, 60, 2, 20);
             }
+            /* Bitmap b = new Bitmap("d.png");
+             Bitmap bb = new Bitmap("dc.png");
+             cloud.GenerateFromDepthMap(b, bb, 90f, 60, 2, 20);*/
+            tmrGenerate.Enabled = true;
+        }
+
+        private void tmrGenerate_Tick(object sender, EventArgs e)
+        {
+            button1_Click(sender, e);
         }
 
         public CloudForm(MainForm mainForm)
@@ -173,7 +182,7 @@ namespace KNRAnglerN
                       ps[1] = p[0] * sS + p[1] * C - p[2] * cS;
                       ps[2] = trbTranslateZValue - (-p[0] * sC + p[1] * S + p[2] * cC);
                       //pt[3] = 1;
-                      //qlern niemiec tnt
+                      
                       byte[] pRGB = pointsRGB[i];
                       int x = (int)(ox + ps[0] * sx);
                       int y = bitHeight - (int)(oy + ps[1] * sy);

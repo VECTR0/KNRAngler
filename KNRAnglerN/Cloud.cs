@@ -90,6 +90,7 @@ namespace KNRAnglerN
             int colorHeight = color.Height;
             int colorWidth = color.Width;
             ReadBitmapToArray(depth, out byte[] depthBytes, out int depthBpp);
+            
             ReadBitmapToArray(color, out byte[] colorBytes, out int colorBpp);
 
             int newPointsNum = colorWidth * colorHeight;
@@ -106,44 +107,29 @@ namespace KNRAnglerN
                     int dx = (int)((float)j * colorWidth / depthWidth);
                     int dy = (int)((float)(colorHeight - i - 1) * colorHeight / depthHeight);
                     int didx = ((dy) * depthWidth + dx) * depthBpp;
-
-                    float d = (depthBytes[didx] / 255f);//0.01 40
-                    /* d *= d;
-                     d *= (40f-0.01f)/255f;
-                     d *= 100f;
-                     
-                     float x = (float)(d / Math.Tan( (3.14 - h_fov)/2 + j * h_fov / colorWidth ));
-                     float y = (float)(-d / Math.Tan( (3.14 - v_fov)/2 + i * v_fov / colorHeight ));
-                     float z = (float)(d);*/
+                    
+                    float d = depthBytes[didx] / 255f;//0.01 40
+                    
                     float h_fov = hFov / 180f * (float)Math.PI;
                     float v_fov = vFov / 180f * (float)Math.PI;
                     float htan = (float)(Math.Tan(h_fov / 2f));
                     float vtan = (float)(Math.Tan(v_fov / 2f));
-                    double de = ((float)(j) / colorWidth-0.5f) * h_fov;
-                    double ro = ((float)(i) / colorHeight-0.5f) * v_fov;
-                    float near = 0.01f;
 
-                    /* float x = (float)(Math.Cos(de)) * r;
-                     float y = (float)(i * 0.01f);
-                     float z = (float)(Math.Sin(de)) * r;*/
-
-                    /*float x = (float)(j * 0.01f);
-                    float y = (float)(Math.Cos(ro)) * r;
-                    float z = (float)(Math.Sin(ro)) * r;*/
-                    d = 1f - d;
-                    d *= 39.9f;
-                    d += 0.01f;
-                    d /= 2f;
+                     d = 1f - d;
+                        d *= 39.99f;
+                        d += 0.01f;
+                    //d *= (20f - 0.4f);
+                   // d += 0.4f;
                     float x0 = (float)(j) / colorWidth* 2 - 1f;
                     float y0 = (float)(i) / colorHeight*2 - 1f;
-                    //float x = (float)( x0 / d / htan);
-                    //float y = (float)( y0 / d / vtan);
-                    float x = (float)(d * Math.Tan(de));
-                    float y = (float)(d * Math.Tan(ro));
-                    float z = d;
 
-                    newPoints[counter] = new float[] { x, y, z };
+                    float x = (float)(d * (x0) * htan);
+                    float y = (float)(d * (y0) *vtan);
+                    float z = -d;
+                    if(d == 0f || d > 39.00f) newPoints[counter] = new float[] { 100, 100, 100 };
+                    else newPoints[counter] = new float[] { x, y, z };
                     newColors[counter++] = new byte[] { colorBytes[idx + 2], colorBytes[idx + 1], colorBytes[idx] };
+                   
                 }
             }
             newPoints[0][0] = 0;
@@ -155,12 +141,13 @@ namespace KNRAnglerN
             AddPoints(newPoints, newColors);
 
             counter = 0;
-            newPoints = new float[4000][];
-            newColors = new byte[4000][];
+            newPoints = new float[8000][];
+            newColors = new byte[8000][];
 
-            for(int i = 0; i < 1000; i++)
+            
+            for (int i = 0; i < 2000; i++)
             {
-                float d = i * 0.1f;
+                float d = i / 2000f * 39.99f + 0.01f;
                 float h_fov = hFov / 180f * (float)Math.PI;
                 float v_fov = vFov / 180f * (float)Math.PI;
                 double de = 0.5 * h_fov;
@@ -174,9 +161,9 @@ namespace KNRAnglerN
                 newPoints[counter] = new float[] { x, y, z };
                 newColors[counter++] = new byte[] { 255, 255, 255 };
             }
-            for(int i = 0; i < 1000; i++)
+            for(int i = 0; i < 2000; i++)
             {
-                float d = i * 0.1f;
+                float d = i / 2000f * 39.99f + 0.01f;
                 float h_fov = hFov / 180f * (float)Math.PI;
                 float v_fov = vFov / 180f * (float)Math.PI;
                 double de = -0.5 * h_fov;
@@ -190,9 +177,9 @@ namespace KNRAnglerN
                 newPoints[counter] = new float[] { x, y, z };
                 newColors[counter++] = new byte[] { 255, 255, 255 };
             }
-            for(int i = 0; i < 1000; i++)
+            for(int i = 0; i < 2000; i++)
             {
-                float d = i * 0.1f;
+                float d = i / 2000f * 39.99f + 0.01f;
                 float h_fov = hFov / 180f * (float)Math.PI;
                 float v_fov = vFov / 180f * (float)Math.PI;
                 double de = 0.5 * h_fov;
@@ -206,9 +193,9 @@ namespace KNRAnglerN
                 newPoints[counter] = new float[] { x, y, z };
                 newColors[counter++] = new byte[] { 255, 255, 255 };
             }
-            for(int i = 0; i < 1000; i++)
+            for(int i = 0; i < 2000; i++)
             {
-                float d = i * 0.1f;
+                float d = i / 2000f * 39.99f+0.01f;
                 float h_fov = hFov / 180f * (float)Math.PI;
                 float v_fov = vFov / 180f * (float)Math.PI;
                 double de = -0.5 * h_fov;
@@ -293,8 +280,8 @@ namespace KNRAnglerN
                     pixels[idx + 1] = pRGB[1];
                     pixels[idx + 2] = pRGB[0];
 
-                    if (x+1 < 0 || y < 0 || x+1 >= width || y >= height) continue;
-                    idx = y * bitmapDataStride + (x+1) * 3;
+                    if (x-1 < 0 || y < 0 || x-1 >= width || y >= height) continue;
+                    idx = y * bitmapDataStride + (x-1) * 3;
                     if (zbuffer[idx] < ptz) continue;
                     zbuffer[idx] = ptz;
                     pixels[idx] = pRGB[2];
