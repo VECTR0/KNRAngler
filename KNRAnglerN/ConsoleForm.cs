@@ -52,7 +52,7 @@ namespace KNRAnglerN
             Log = "SENT [" + cmbPacket.Text.PadRight(maxLength) + "] " + txtJson.Text;
             try
             {
-                instance.okonClient.SendString((byte)Enum.Parse(typeof(MainForm.Packet), cmbPacket.Text), txtJson.Text);
+                instance.okonClient.EnqueuePacket((byte)Enum.Parse(typeof(MainForm.Packet), cmbPacket.Text), txtJson.Text);
             }
             catch
             {

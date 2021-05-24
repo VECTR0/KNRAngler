@@ -47,11 +47,15 @@ namespace KNRAnglerN
             ACK = 0xC1,
             GET_ORIEN = 0xC2,
             SET_ORIEN = 0xC3,
+            RST_SIM = 0xC4,
+            PING = 0xC5,
+            GET_CPS = 0xC6,
+            HIT_NGZ = 0xC7,
+            HIT_FZ = 0xC8,
             REC_STRT = 0xD0,
             REC_ST = 0xD1,
             REC_RST = 0xD2,
             GET_REC = 0xD3,
-            PING = 0xC5,
             GET_DETE = 0xDE
         }
 
@@ -166,11 +170,23 @@ namespace KNRAnglerN
                     }
                     break;
                 case Packet.GET_SENS:
-                    sens = Utf8Json.JsonSerializer.Deserialize<Sensors>(e.packetData);
+                    try
+                    {
+                        sens = Utf8Json.JsonSerializer.Deserialize<Sensors>(e.packetData);
+                    }//TODO
+                    catch { }
                     break;
                 case Packet.PING:
                     json = Utf8Json.JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData));
                     ping = (int)json["ping"];
+                    break;
+                case Packet.HIT_NGZ:
+                    json = Utf8Json.JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData));
+                    consoleForm.Log = "HIT NGZ " + (string)json["id"];
+                    break;
+                    case Packet.HIT_FZ:
+                    json = Utf8Json.JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData));
+                    consoleForm.Log = "HIT FZ " + (string)json["id"];
                     break;
                 default:
                     consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + Encoding.ASCII.GetString(e.packetData, 0, e.packetData.Length);
@@ -185,7 +201,7 @@ namespace KNRAnglerN
                 if (requestedVideoFeedFrames < 2)
                     try
                     {
-                        okonClient.SendString((byte)Packet.GET_VIDEO_BYTES, (byte)Flag.DO_NOT_LOG_PACKET, "");
+                        okonClient.EnqueuePacket((byte)Packet.GET_VIDEO_BYTES, (byte)Flag.DO_NOT_LOG_PACKET, "");
                         requestedVideoFeedFrames++;
                     }
                     catch
@@ -196,7 +212,7 @@ namespace KNRAnglerN
                 if (requestedDepthMapFrames < 2)
                     try
                     {
-                        okonClient.SendString((byte)Packet.GET_DEPTH_BYTES, (byte)Flag.DO_NOT_LOG_PACKET, "");
+                        okonClient.EnqueuePacket((byte)Packet.GET_DEPTH_BYTES, (byte)Flag.DO_NOT_LOG_PACKET, "");
                         requestedDepthMapFrames++;
                     }
                     catch
@@ -255,7 +271,7 @@ namespace KNRAnglerN
             try
             {
                 if (keys.Contains(Keys.T)) {
-                    okonClient.SendString((byte)Packet.SET_MTR, (byte)Flag.DO_NOT_LOG_PACKET,
+                    okonClient.EnqueuePacket((byte)Packet.SET_MTR, (byte)Flag.DO_NOT_LOG_PACKET,
                         "{\"FLH\":" + (0.5).ToString().Replace(',', '.') +
                         ",\"FLV\":" + (0.5).ToString().Replace(',', '.') +
                         ",\"BLV\":" + (0.5).ToString().Replace(',', '.') +
@@ -268,7 +284,7 @@ namespace KNRAnglerN
                 }
                 else
                 {
-                    okonClient.SendString((byte)Packet.SET_MTR, (byte)Flag.DO_NOT_LOG_PACKET,
+                    okonClient.EnqueuePacket((byte)Packet.SET_MTR, (byte)Flag.DO_NOT_LOG_PACKET,
                     "{\"FLH\":" + (forward + right + yaw).ToString().Replace(',', '.') +
                     ",\"FLV\":" + (up + pitch + roll).ToString().Replace(',', '.') +
                     ",\"BLV\":" + (up - pitch + roll).ToString().Replace(',', '.') +
@@ -290,7 +306,7 @@ namespace KNRAnglerN
         {
             try
             {
-                okonClient.SendString((byte)Packet.SET_MTR, (byte)Flag.DO_NOT_LOG_PACKET,
+                okonClient.EnqueuePacket((byte)Packet.SET_MTR, (byte)Flag.DO_NOT_LOG_PACKET,
                     "{\"FLH\":" + (forward + right + yaw).ToString().Replace(',', '.') +
                     ",\"FLV\":" + (up + pitch + roll).ToString().Replace(',', '.') +
                     ",\"BLV\":" + (up - pitch + roll).ToString().Replace(',', '.') +
@@ -336,7 +352,7 @@ namespace KNRAnglerN
                 try
                 {
                     long time = (System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond);
-                    okonClient.SendString((byte)Packet.PING, (byte)Flag.DO_NOT_LOG_PACKET, "{\"timestamp\":" + time + ",\"ping\":0}");
+                    okonClient.EnqueuePacket((byte)Packet.PING, (byte)Flag.DO_NOT_LOG_PACKET, "{\"timestamp\":" + time + ",\"ping\":0}");
                 }
                 catch { }
             }
@@ -358,7 +374,7 @@ namespace KNRAnglerN
                 if (img != null) img.Dispose();
             }));
 
-            if (okonClient != null && okonClient.IsConnected()) okonClient.SendString((byte)Packet.GET_SENS, (byte)Flag.DO_NOT_LOG_PACKET, "");
+            if (okonClient != null && okonClient.IsConnected()) okonClient.EnqueuePacket((byte)Packet.GET_SENS, (byte)Flag.DO_NOT_LOG_PACKET, "");
         }
 
         bool joystickEnabled = true;
@@ -370,18 +386,17 @@ namespace KNRAnglerN
             float X = RemapValue(joystickState.X);
             float Y = RemapValue(joystickState.Y);
             float Z = RemapValue(joystickState.Z);
-            if (Math.Abs(X) > Math.Abs(Y)) Y = 0;
-            else X = 0;
-
+    
             float RX = RemapValue(joystickState.RotationX);
             float RY = RemapValue(joystickState.RotationY);
 
-            float roll = 0;
-            if (joystickState.Buttons[4]) roll -= 0.4f;
-            if (joystickState.Buttons[5]) roll += 0.4f;
+            float btns = 0;
+            if (joystickState.Buttons[4]) btns -= 0.4f;
+            if (joystickState.Buttons[5]) btns += 0.4f;
 
             if (!(okonClient == null || !okonClient.IsConnected() || !settingsForm.chkManualControl.Checked || !joystickEnabled))
-                UpdateMotors(-Y, X, -Z, RX*0.8f, RY, roll);
+                UpdateMotors(-Z, btns, -Y, X, RY, RX);
+            //old  UpdateMotors(-Y, X, -Z, RX*0.8f, RY, roll);
 
             if (joystickState.Buttons[1])
             {
