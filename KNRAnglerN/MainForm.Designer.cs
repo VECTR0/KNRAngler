@@ -57,7 +57,7 @@
             // tmrGetVideo
             // 
             this.tmrGetVideo.Enabled = true;
-            this.tmrGetVideo.Interval = 33;
+            this.tmrGetVideo.Interval = 30;
             this.tmrGetVideo.Tick += new System.EventHandler(this.tmrFrameRate_Tick);
             // 
             // picDepthMap

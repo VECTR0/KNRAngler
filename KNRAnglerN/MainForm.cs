@@ -75,7 +75,7 @@ namespace KNRAnglerN
             settingsForm = new SettingsForm(this);
             Text = "KNR Wędkarz - Okoń Sim control v" + ver + " by Vectro 2021";
             cloudForm = new CloudForm(this) { Visible = true};
-
+            cloudForm.Hide();
             //DInput
             foreach (var deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices))
             {
@@ -173,7 +173,7 @@ namespace KNRAnglerN
                     try
                     {
                         sens = Utf8Json.JsonSerializer.Deserialize<Sensors>(e.packetData);
-                    }//TODO
+                    }//TODO fix invalid string parse double
                     catch { }
                     break;
                 case Packet.PING:
