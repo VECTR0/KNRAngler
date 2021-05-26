@@ -14,7 +14,7 @@ namespace KNRAnglerN
     {
         private Sensors _sens = new Sensors();
 
-        private const string Ver = "7.2";
+        private const string Ver = "7.3";
         public readonly ConsoleForm consoleForm;
         public readonly SettingsForm settingsForm;
         public readonly CloudForm cloudForm;
