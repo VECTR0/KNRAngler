@@ -1,11 +1,14 @@
-﻿namespace KNRAnglerN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace KNRAnglerN
 {
     partial class ConsoleForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -101,9 +104,9 @@
         }
 
         #endregion
-        public System.Windows.Forms.Button btnSendJson;
-        public System.Windows.Forms.ComboBox cmbPacket;
-        public System.Windows.Forms.TextBox txtConsole;
-        public System.Windows.Forms.TextBox txtJson;
+        public Button btnSendJson;
+        public ComboBox cmbPacket;
+        public TextBox txtConsole;
+        public TextBox txtJson;
     }
 }

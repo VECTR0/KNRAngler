@@ -1,39 +1,36 @@
-﻿using SharpDX.DirectInput;
-using System;
+﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using SharpDX.DirectInput;
+using Utf8Json;
 
 namespace KNRAnglerN
 {
     public partial class MainForm : Form
     {
-        public Sensors sens = new Sensors();
+        private Sensors _sens = new Sensors();
 
-        public const string ver = "7.2";
+        private const string Ver = "7.2";
         public readonly ConsoleForm consoleForm;
         public readonly SettingsForm settingsForm;
         public readonly CloudForm cloudForm;
         public OkonClient okonClient;
-        public int requestedVideoFeedFrames = 0;
-        public int requestedDepthMapFrames = 0;
-        public int framesNum = 0;
-        public int ping = 0;
-        DateTime framesLastCheck = DateTime.Now;
-        private object lock_ = new object();
-        HUD hud;
+        public int requestedVideoFeedFrames;
+        public int requestedDepthMapFrames;
+        private int _framesNum;
+        private int _ping;
+        private DateTime _framesLastCheck = DateTime.Now;
+        private HUD _hud;
 
         //Controller
-        DirectInput directInput = new DirectInput();
-        JoystickState joystickState = new JoystickState();
-        Guid joystickGuid = Guid.Empty;
-        Joystick joystick;
+        private DirectInput directInput = new DirectInput();
+        private JoystickState joystickState = new JoystickState();
+        private Guid joystickGuid = Guid.Empty;
+        private Joystick joystick;
         //
 
         public enum Packet : byte
@@ -62,7 +59,7 @@ namespace KNRAnglerN
         [Flags]
         private enum Flag
         {
-            None = 0,
+            NONE = 0,
             SERVER_ECHO = 1,
             DO_NOT_LOG_PACKET = 2,
             TEST = 128
@@ -73,9 +70,10 @@ namespace KNRAnglerN
             CheckForIllegalCrossThreadCalls = false;
             consoleForm = new ConsoleForm(this);
             settingsForm = new SettingsForm(this);
-            Text = "KNR Wędkarz - Okoń Sim control v" + ver + " by Vectro 2021";
-            cloudForm = new CloudForm(this) { Visible = true};
-            cloudForm.Hide();
+            Text = "KNR Wędkarz - Okoń Sim control v" + Ver + " by Vectro 2021";
+            /*cloudForm = new CloudForm(this) { Visible = true };
+            cloudForm.Hide();*/
+           
             //DInput
             foreach (var deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices))
             {
@@ -86,7 +84,7 @@ namespace KNRAnglerN
             joystick = new Joystick(directInput, joystickGuid);
             joystick.Properties.BufferSize = 128;
             joystick.Acquire();
-            var axes = joystick.Capabilities.AxeCount;
+            int axes = joystick.Capabilities.AxeCount;
             int buttons = joystick.Capabilities.ButtonCount;
             int povs = joystick.Capabilities.PovCount;
 
@@ -96,22 +94,25 @@ namespace KNRAnglerN
 
         public class Info : OkonClient.IInfo
         {
-            public MainForm mainFormInstance;
-            public Info(MainForm instance) => this.mainFormInstance = instance;
+            private readonly MainForm _mainFormInstance;
+            public Info(MainForm instance) => _mainFormInstance = instance;
             public void YeetLog(string info)
             {
-                if (mainFormInstance.settingsForm.chkYeetLog.Checked)
-                    mainFormInstance.consoleForm.txtConsole.AppendText("[LOG]: " + info + Environment.NewLine);
+                if (_mainFormInstance.settingsForm.chkYeetLog.Checked)
+                    _mainFormInstance.consoleForm.txtConsole.AppendText("[LOG]: " + info + Environment.NewLine);
             }
             public void YeetException(Exception exp)
             {
                 try
                 {
                     if (exp.Message.ToLower().Contains("aborted")) return;
-                    mainFormInstance.consoleForm.txtConsole.AppendText("[ERR]: " + exp.Message + Environment.NewLine);
-                    mainFormInstance.consoleForm.txtConsole.AppendText("[ERR]: " + exp.StackTrace + Environment.NewLine);
+                    _mainFormInstance.consoleForm.txtConsole.AppendText("[ERR]: " + exp.Message + Environment.NewLine);
+                    _mainFormInstance.consoleForm.txtConsole.AppendText("[ERR]: " + exp.StackTrace + Environment.NewLine);
                 }
-                catch { }
+                catch
+                {
+                    // ignored
+                }
             }
         }
 
@@ -120,7 +121,7 @@ namespace KNRAnglerN
             //  this.BeginInvoke((Action)(() => MessageBox.Show("Warning!\nDevelopment build, some components may not work"))); 
             pictureBox1.Controls.Add(picHUD);
             picHUD.BackColor = Color.Transparent;
-            hud = new HUD(pictureBox1.Width, pictureBox1.Height, 60, 91.5f);
+            _hud = new HUD(pictureBox1.Width, pictureBox1.Height, 60, 91.5f);
         }
 
         public void HandleReceivedPacket(object o, OkonClient.PacketEventArgs e)
@@ -129,23 +130,23 @@ namespace KNRAnglerN
             foreach (var s in Enum.GetNames(typeof(Packet))) maxLength = Math.Max(maxLength, s.Length);
             switch ((Packet)e.packetType)
             {
-                case Packet.GET_DEPTH:
+               case Packet.GET_DEPTH:
                     consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + Encoding.ASCII.GetString(e.packetData, 0, e.packetData.Length);
-                    var json = Utf8Json.JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData));
-                    using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(json["depth"])))
-                    {
-                        picDepthMap.Invoke(new Action(() =>
-                         {
-                             Image img = picDepthMap.Image;
-                             picDepthMap.Image = Image.FromStream(ms);
-                             if (img != null) img.Dispose();
-                         }));
-                    }
+                    var json = JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData, 0, e.dataLength));
+                    /* using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(json["depth"])))
+                     {
+                         picDepthMap.Invoke(new Action(() =>
+                          {
+                              Image img = picDepthMap.Image;
+                              picDepthMap.Image = Image.FromStream(ms);
+                              if (img != null) img.Dispose();
+                          }));
+                     }*/
                     break;
                 case Packet.GET_DEPTH_BYTES:
                     requestedDepthMapFrames--;
-                    //Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + "size: " + e.packetData.Length +"B";
-                    using (var ms = new MemoryStream(e.packetData))
+                    //consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + "size: " + e.packetData.Length +"B";
+                    using (var ms = new MemoryStream(e.packetData, 0, e.dataLength))
                     {
                         picDepthMap.Invoke(new Action(() =>
                          {
@@ -157,8 +158,8 @@ namespace KNRAnglerN
                     break;
                 case Packet.GET_VIDEO_BYTES:
                     requestedVideoFeedFrames--;
-                    //Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + "size: " + e.packetData.Length +"B";
-                    using (var ms = new MemoryStream(e.packetData))
+                    //consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + "size: " + e.packetData.Length +"B";
+                    using (var ms = new MemoryStream(e.packetData, 0, e.dataLength))
                     {
                         pictureBox1.Invoke(new Action(() =>
                         {
@@ -166,76 +167,74 @@ namespace KNRAnglerN
                             pictureBox1.Image = Image.FromStream(ms);
                             if (img != null) img.Dispose();
                         }));
-                        framesNum++;
+                        _framesNum++;
                     }
                     break;
                 case Packet.GET_SENS:
                     try
                     {
-                        sens = Utf8Json.JsonSerializer.Deserialize<Sensors>(e.packetData);
+                        _sens = JsonSerializer.Deserialize<Sensors>(e.packetData);
                     }//TODO fix invalid string parse double
                     catch { }
                     break;
                 case Packet.PING:
-                    json = Utf8Json.JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData));
-                    ping = (int)json["ping"];
+                    json = JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData, 0, e.dataLength));
+                    _ping = (int)json["ping"];
                     break;
                 case Packet.HIT_NGZ:
-                    json = Utf8Json.JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData));
+                    json = JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData, 0, e.dataLength));
                     consoleForm.Log = "HIT NGZ " + (string)json["id"];
                     break;
-                    case Packet.HIT_FZ:
-                    json = Utf8Json.JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData));
+                case Packet.HIT_FZ:
+                    json = JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData, 0, e.dataLength));
                     consoleForm.Log = "HIT FZ " + (string)json["id"];
                     break;
                 default:
                     consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + Encoding.ASCII.GetString(e.packetData, 0, e.packetData.Length);
                     break;
             }
-        }   
+            
+        }
 
         private void tmrFrameRate_Tick(object sender, EventArgs e)
         {
             if (okonClient != null && okonClient.IsConnected() && settingsForm.chkVideoFeed.Checked)
             {
-                if (requestedVideoFeedFrames < 2)
-                    try
+                try
+                {
+                    if (requestedVideoFeedFrames < 2)
                     {
                         okonClient.EnqueuePacket((byte)Packet.GET_VIDEO_BYTES, (byte)Flag.DO_NOT_LOG_PACKET, "");
                         requestedVideoFeedFrames++;
                     }
-                    catch
-                    {
-                        consoleForm.Log = "Error, packet not sent";
-                        settingsForm.chkVideoFeed.Checked = false;
-                    }
-                if (requestedDepthMapFrames < 2)
-                    try
+                    
+                    if (requestedDepthMapFrames < 2)
                     {
                         okonClient.EnqueuePacket((byte)Packet.GET_DEPTH_BYTES, (byte)Flag.DO_NOT_LOG_PACKET, "");
                         requestedDepthMapFrames++;
                     }
-                    catch
-                    {
-                        consoleForm.Log = "Error, packet not sent";
-                        settingsForm.chkVideoFeed.Checked = false;
-                    }
+                }
+                catch
+                {
+                    consoleForm.Log = "Error, packet not sent in tmrVideoFeed";
+                    settingsForm.chkVideoFeed.Checked = false;
+                }
             }
         }
 
-        private HashSet<Keys> keys = new HashSet<Keys>();
+        private readonly HashSet<Keys> _keys = new HashSet<Keys>();
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            keys.Add(e.KeyCode);
-            if (e.KeyCode == Keys.H) joystickEnabled = !joystickEnabled;
+            _keys.Add(e.KeyCode);
+            if (e.KeyCode == Keys.H) _joystickEnabled = !_joystickEnabled;
             if (okonClient == null || !okonClient.IsConnected() || !settingsForm.chkManualControl.Checked) return;
             UpdateManualControl();
         }
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
-            keys.Remove(e.KeyCode);
+            _keys.Remove(e.KeyCode);
             if (okonClient == null || !okonClient.IsConnected() || !settingsForm.chkManualControl.Checked) return;
             UpdateManualControl();
         }
@@ -243,18 +242,18 @@ namespace KNRAnglerN
         private void UpdateManualControl()
         {//W A S D  Q E
             float forward = 0, right = 0, up = 0, yaw = 0, pitch = 0, roll = 0;
-            if (keys.Contains(Keys.W)) forward += .7f;
-            if (keys.Contains(Keys.S)) forward -= .7f;
-            if (keys.Contains(Keys.A)) right -= .7f;
-            if (keys.Contains(Keys.D)) right += .7f;
-            if (keys.Contains(Keys.ShiftKey)) up += 0.5f;
-            if (keys.Contains(Keys.ControlKey)) up -= 0.5f;
-            if (keys.Contains(Keys.Q)) yaw -= 0.5f;
-            if (keys.Contains(Keys.E)) yaw += 0.5f;
-            if (keys.Contains(Keys.I)) pitch -= 0.5f;
-            if (keys.Contains(Keys.K)) pitch += 0.5f;
-            if (keys.Contains(Keys.J)) roll -= 0.5f;
-            if (keys.Contains(Keys.L)) roll += 0.5f;
+            if (_keys.Contains(Keys.W)) forward += .7f;
+            if (_keys.Contains(Keys.S)) forward -= .7f;
+            if (_keys.Contains(Keys.A)) right -= .7f;
+            if (_keys.Contains(Keys.D)) right += .7f;
+            if (_keys.Contains(Keys.ShiftKey)) up += 0.5f;
+            if (_keys.Contains(Keys.ControlKey)) up -= 0.5f;
+            if (_keys.Contains(Keys.Q)) yaw -= 0.5f;
+            if (_keys.Contains(Keys.E)) yaw += 0.5f;
+            if (_keys.Contains(Keys.I)) pitch -= 0.5f;
+            if (_keys.Contains(Keys.K)) pitch += 0.5f;
+            if (_keys.Contains(Keys.J)) roll -= 0.5f;
+            if (_keys.Contains(Keys.L)) roll += 0.5f;
 
             //float l = Math.Max(Math.Min((.5f * dir + 1 * vel), 1), -1);
             //float r = Math.Max(Math.Min((-.5f * dir + 1 * vel), 1), -1);
@@ -270,7 +269,7 @@ namespace KNRAnglerN
 
             try
             {
-                if (keys.Contains(Keys.T)) {
+                if (_keys.Contains(Keys.T)) {
                     okonClient.EnqueuePacket((byte)Packet.SET_MTR, (byte)Flag.DO_NOT_LOG_PACKET,
                         "{\"FLH\":" + (0.5).ToString().Replace(',', '.') +
                         ",\"FLV\":" + (0.5).ToString().Replace(',', '.') +
@@ -343,41 +342,28 @@ namespace KNRAnglerN
 
         private void tmrFramerate_Tick_1(object sender, EventArgs e)
         {
-            lblFrameRate.Text = Math.Round((1000.0 * framesNum / (DateTime.Now.Subtract(framesLastCheck).TotalMilliseconds))).ToString() + "FPS ping " + ping + "ms";
+            lblFrameRate.Text = Math.Round((1000.0 * _framesNum / (DateTime.Now.Subtract(_framesLastCheck).TotalMilliseconds))) + "FPS ping " + _ping + "ms";
 
-            framesLastCheck = DateTime.Now;
-            framesNum = 0;
-            if (okonClient != null && okonClient.IsConnected())
-            {
-                try
-                {
-                    long time = (System.DateTime.Now.Ticks / System.TimeSpan.TicksPerMillisecond);
-                    okonClient.EnqueuePacket((byte)Packet.PING, (byte)Flag.DO_NOT_LOG_PACKET, "{\"timestamp\":" + time + ",\"ping\":0}");
-                }
-                catch { }
-            }
+            _framesLastCheck = DateTime.Now;
+            _framesNum = 0;
+            if (okonClient != null && okonClient.IsConnected()) okonClient.EnqueuePacket((byte)Packet.PING, (byte)Flag.DO_NOT_LOG_PACKET, "{\"timestamp\":" + (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) + ",\"ping\":0}");
+        }//TODO check if try catch was needed
 
-        }
-
-        
-
-
-        double time = 0;
         private void tmrHUD_Tick(object sender, EventArgs e)
         {
             picHUD.Invoke(new Action(() =>
             {
                 Image img = picHUD.Image;
-                hud.Update(sens.gyro);
-                hud.metersUnderWater = sens.baro.pressure / 4200 / 9.81f;
-                picHUD.Image = hud.Generate();
+                _hud.Update(_sens.gyro);
+                _hud.metersUnderWater = _sens.baro.pressure / 4200 / 9.81f;
+                picHUD.Image = _hud.Generate();
                 if (img != null) img.Dispose();
             }));
 
             if (okonClient != null && okonClient.IsConnected()) okonClient.EnqueuePacket((byte)Packet.GET_SENS, (byte)Flag.DO_NOT_LOG_PACKET, "");
         }
 
-        bool joystickEnabled = true;
+        private bool _joystickEnabled = true;
         private void tmrGamepad_Tick(object sender, EventArgs e)
         {
             if (joystick == null) return;
@@ -394,14 +380,9 @@ namespace KNRAnglerN
             if (joystickState.Buttons[4]) btns -= 0.4f;
             if (joystickState.Buttons[5]) btns += 0.4f;
 
-            if (!(okonClient == null || !okonClient.IsConnected() || !settingsForm.chkManualControl.Checked || !joystickEnabled))
+            if (!(okonClient == null || !okonClient.IsConnected() || !settingsForm.chkManualControl.Checked || !_joystickEnabled))
                 UpdateMotors(-Z, btns, -Y, X, RY, RX);
             //old  UpdateMotors(-Y, X, -Z, RX*0.8f, RY, roll);
-
-            if (joystickState.Buttons[1])
-            {
-                consoleForm.txtConsole.AppendText("klik" + Environment.NewLine);
-            }
 
             if (joystickState.Buttons[2])
             {
@@ -411,7 +392,7 @@ namespace KNRAnglerN
                     try
                     {
                         var mightGoBoom = joystick.GetObjectInfoByName(jo.ToString());
-                        consoleForm.txtConsole.AppendText(jo.ToString() + Environment.NewLine);
+                        consoleForm.txtConsole.AppendText(jo + Environment.NewLine);
                     }
                     catch { }
                 }
@@ -424,7 +405,7 @@ namespace KNRAnglerN
             float raw = (2 * value) / 65536f - 1f;
             if (Math.Abs(raw) < deadzone) return 0;
             if (raw > 0) return (raw - deadzone) / (1f - deadzone);
-            else return (raw + deadzone) / (1f - deadzone) ;
+            return (raw + deadzone) / (1f - deadzone) ;
         }
     }
     public class Sensors

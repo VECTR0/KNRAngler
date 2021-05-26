@@ -1,14 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using MathNet.Numerics.LinearAlgebra;
 
@@ -38,6 +31,8 @@ namespace KNRAnglerN
                 Bitmap d = new Bitmap(instance.picDepthMap.Image);
                 Bitmap c = new Bitmap(instance.pictureBox1.Image);
                 cloud.GenerateFromDepthMap(d, c, 91.49284f, 60, 2, 20);
+                d.Dispose();
+                c.Dispose();
             }
             /* Bitmap b = new Bitmap("d.png");
              Bitmap bb = new Bitmap("dc.png");
@@ -53,7 +48,7 @@ namespace KNRAnglerN
         public CloudForm(MainForm mainForm)
         {
             InitializeComponent();
-            this.instance = mainForm;
+            instance = mainForm;
             DoubleBuffered = true;
         }
 
@@ -63,8 +58,8 @@ namespace KNRAnglerN
         void AddPoint(float x, float y, float z, int r, int g, int b)
         {
             if (x*x+y*y+z*z < 12) return;
-            points.Add(new float[] { x, y, z });
-            pointsRGB.Add(new byte[] { (byte)r, (byte)g, (byte)b });
+            points.Add(new[] { x, y, z });
+            pointsRGB.Add(new[] { (byte)r, (byte)g, (byte)b });
             pointsTrans.Add(new float[] { 0, 0, 0 });
             pointsScreen.Add(new float[] { 0, 0, 0 });
         }
@@ -118,12 +113,13 @@ namespace KNRAnglerN
         {
             Stopwatch st = new Stopwatch();
             st.Start();
-           /* if (instance.picDepthMap.Image != null && instance.pictureBox1.Image != null)
-            {
-                Bitmap d = new Bitmap(instance.picDepthMap.Image);
-                Bitmap c = new Bitmap(instance.pictureBox1.Image);
-                cloud.GenerateFromDepthMap(d, c, 90, 60, 2, 20);
-            }*/
+            #region kom
+            /* if (instance.picDepthMap.Image != null && instance.pictureBox1.Image != null)
+             {
+                 Bitmap d = new Bitmap(instance.picDepthMap.Image);
+                 Bitmap c = new Bitmap(instance.pictureBox1.Image);
+                 cloud.GenerateFromDepthMap(d, c, 90, 60, 2, 20);
+             }*/
             /* for (int i = 0; i < picRender.Width; i++)
                  for (int j = 0; j < picRender.Height; j++)
                      zbuf[i, j] = 9999f;*/
@@ -240,8 +236,8 @@ namespace KNRAnglerN
               Marshal.Copy(pixels, 0, ptrFirstPixel, pixels.Length);
               bit.UnlockBits(bitmapData);
               st.Stop();*/
-
-            Bitmap bit = cloud.Render(trbRotationX.Value / 180f * (float)Math.PI,
+            #endregion
+           /* Bitmap bit = cloud.Render(trbRotationX.Value / 180f * (float)Math.PI,
                 trbRotationY.Value / 180f * (float)Math.PI,
                 trbTranslateX.Value,
                 trbTranslateY.Value,
@@ -252,7 +248,7 @@ namespace KNRAnglerN
                  Image img = picRender.Image;
                  picRender.Image = bit;
                  if (img != null) img.Dispose();
-             }));
+             }));*/
             
             Text = st.ElapsedMilliseconds.ToString();
         }

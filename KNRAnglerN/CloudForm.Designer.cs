@@ -1,11 +1,14 @@
-﻿namespace KNRAnglerN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace KNRAnglerN
 {
     partial class CloudForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -59,7 +62,6 @@
             // 
             // tmrRender
             // 
-            this.tmrRender.Enabled = true;
             this.tmrRender.Interval = 50;
             this.tmrRender.Tick += new System.EventHandler(this.tmrRender_Tick);
             // 
@@ -180,16 +182,16 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox picRender;
-        private System.Windows.Forms.Timer tmrRender;
-        private System.Windows.Forms.TrackBar trbTranslateY;
-        private System.Windows.Forms.TrackBar trbTranslateX;
-        private System.Windows.Forms.TrackBar trbRotationX;
-        private System.Windows.Forms.TrackBar trbTranslateZ;
-        private System.Windows.Forms.TrackBar trbRotationY;
-        private System.Windows.Forms.Label lblNum;
-        private System.Windows.Forms.Button btnGenerate;
-        private System.Windows.Forms.TrackBar trbScale;
-        private System.Windows.Forms.Timer tmrGenerate;
+        private PictureBox picRender;
+        private Timer tmrRender;
+        private TrackBar trbTranslateY;
+        private TrackBar trbTranslateX;
+        private TrackBar trbRotationX;
+        private TrackBar trbTranslateZ;
+        private TrackBar trbRotationY;
+        private Label lblNum;
+        private Button btnGenerate;
+        private TrackBar trbScale;
+        private Timer tmrGenerate;
     }
 }

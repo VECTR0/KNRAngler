@@ -1,11 +1,10 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace KNRAnglerN
 {
@@ -13,20 +12,20 @@ namespace KNRAnglerN
     {
         public const int Version = 3;
         public event PacketEventHandler PacketReceived;
-        public readonly string hostname;
-        public readonly ushort port;
+        private readonly string _hostname;
+        private readonly ushort _port;
         private readonly IInfo _info;
         private volatile bool _connected;
         private TcpClient _client;
         private NetworkStream _stream;
         private Thread _thread;
-        private ConcurrentQueue<Packet> _toSend;
+        private readonly ConcurrentQueue<Packet> _toSend;
 
         public OkonClient(string hostname, ushort port, IInfo info)
         {
-            this.hostname = hostname;
-            this.port = port;
-            this._info = info;
+            _hostname = hostname;
+            _port = port;
+            _info = info;
             _info.YeetLog("OkonClient instance created");
             _toSend = new ConcurrentQueue<Packet>();
         }
@@ -36,7 +35,7 @@ namespace KNRAnglerN
             _connected = true;
             try
             {
-                _client = new TcpClient(hostname, port);
+                _client = new TcpClient(_hostname, _port);
                 _stream = _client.GetStream();
                 _thread = new Thread(Transreceive)
                 {
@@ -55,31 +54,32 @@ namespace KNRAnglerN
         }
         private void Transreceive()
         {
-            byte packetType, packetFlag;
             byte[] dataLenBytes = new byte[4];
-            byte[] dataBytes;
             try
             {
                 while (_client.Connected)
                 {
                     if (_stream.DataAvailable)
                     {
-                        packetType = ReadByteFromStream(_stream);
-                        packetFlag = ReadByteFromStream(_stream);
+                        byte packetType = ReadByteFromStream(_stream);
+                        byte packetFlag = ReadByteFromStream(_stream);
                         ReadAllFromStream(_stream, dataLenBytes, 4);
-                        int dataLength = System.BitConverter.ToInt32(dataLenBytes, 0);
-                        dataBytes = new byte[dataLength];
+                        int dataLength = BitConverter.ToInt32(dataLenBytes, 0);
+                        byte[] dataBytes = ArrayPool<byte>.Shared.Rent(dataLength);
                         ReadAllFromStream(_stream, dataBytes, dataLength);
-                        PacketReceived(this, new PacketEventArgs(packetType, packetFlag, dataBytes));
-                        _info.YeetLog("Received packet type: " + packetType.ToString("x2") + " flag:" + Convert.ToString(packetFlag, 2).PadLeft(8, '0') + " len: " + dataLength);
+                        PacketReceived?.Invoke(this, new PacketEventArgs(packetType, packetFlag, dataBytes, dataLength));
+                        ArrayPool<byte>.Shared.Return(dataBytes);
+                       // _info.YeetLog("Received packet type: " + packetType.ToString("x2") + " flag:" + Convert.ToString(packetFlag, 2).PadLeft(8, '0') + " len: " + dataLength);
                     }
                     else
                     {
-                        if (!_toSend.IsEmpty)
-                        {
+                        if (!_toSend.IsEmpty) {
                             while (!_toSend.IsEmpty)
                                 if (_toSend.TryDequeue(out Packet packet))
-                                    Send(packet.packetType, packet.flag, packet.bytes);
+                                {
+                                    Send(packet);
+                                    if(packet.rented) ArrayPool<byte>.Shared.Return(packet.bytes);
+                                }
                         }
                         else Thread.Sleep(1);
                     }
@@ -87,7 +87,6 @@ namespace KNRAnglerN
             }
             catch (Exception exp)
             {
-                //_info.YeetLog()
                 _info.YeetException(exp);
             }
             finally
@@ -96,48 +95,25 @@ namespace KNRAnglerN
             }
         }
 
-        public void EnqueuePacket(byte packetType, byte packetFlag, string json) => _toSend.Enqueue(new Packet(packetType, packetFlag, Encoding.ASCII.GetBytes(json)));
-        public void EnqueuePacket(byte packetType, string json) => _toSend.Enqueue(new Packet(packetType, 0, Encoding.ASCII.GetBytes(json)));
-        public void EnqueuePacket(byte packetType, byte packetFlag, byte[] bytes) => _toSend.Enqueue(new Packet(packetType, packetFlag, bytes));
-        public void EnqueuePacket(byte packetType, byte[] bytes) => _toSend.Enqueue(new Packet(packetType, 0, bytes));
-
-
-        private void Send(byte packetType, byte packetFlag, string json)
+        public void EnqueuePacket(byte packetType, byte packetFlag, string json)
         {
-            byte[] bytes = Encoding.ASCII.GetBytes(json);
-            _stream.WriteByte(packetType);
-            _stream.WriteByte(packetFlag);
-            _stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
-            _stream.Write(bytes, 0, bytes.Length);
+            byte[] bytes = ArrayPool<byte>.Shared.Rent(Encoding.ASCII.GetMaxByteCount(json.Length));
+            int len = Encoding.ASCII.GetBytes(json, 0, json.Length, bytes, 0);
+            _toSend.Enqueue(new Packet(packetType, packetFlag, bytes, len, true));
         }
-            
-        private void Send(byte packetType, byte packetFlag, byte[] bytes)
+        public void EnqueuePacket(byte packetType, string json) => EnqueuePacket(packetType, 0, json);
+        public void EnqueuePacket(byte packetType, byte packetFlag, byte[] bytes, int len, bool rented) => _toSend.Enqueue(new Packet(packetType, packetFlag, bytes, len, rented));
+        public void EnqueuePacket(byte packetType, byte[] bytes, int len, bool rented) => _toSend.Enqueue(new Packet(packetType, 0, bytes, len, rented));
+
+        private void Send(Packet packet)
         {
-            _stream.WriteByte(packetType);
-            _stream.WriteByte(packetFlag);
-            _stream.Write(BitConverter.GetBytes(bytes.Length), 0, 4);
-            _stream.Write(bytes, 0, bytes.Length);
+            _stream.WriteByte(packet.type);
+            _stream.WriteByte(packet.flag);
+            _stream.Write(BitConverter.GetBytes(packet.length), 0, 4);
+            _stream.Write(packet.bytes, 0, packet.length);
         }
 
-        private void SendBytes(byte packetType, byte[] data)
-        {
-            _stream.WriteByte(packetType);
-            _stream.WriteByte(0);
-            _stream.Write(BitConverter.GetBytes(data.Length), 0, 4);
-            _stream.Write(data, 0, data.Length);
-        }
-
-        private void SendString(byte packetType, string data)
-        {
-            if (_stream == null) return;
-            _stream.WriteByte(packetType);
-            _stream.WriteByte(0);
-            byte[] bytes = Encoding.ASCII.GetBytes(data);
-            _stream.Write(System.BitConverter.GetBytes(bytes.Length), 0, 4);
-            if (bytes.Length > 0) _stream.Write(bytes, 0, bytes.Length);
-        }
-
-        public void Disconnect()
+        private void Disconnect()
         {
             if (!_connected) return;
             _thread?.Abort();
@@ -154,21 +130,23 @@ namespace KNRAnglerN
             public readonly byte[] packetData;
             public readonly byte packetType;
             public readonly byte packetFlag;
-            public PacketEventArgs(byte type, byte flag, byte[] data)
+            public readonly int dataLength;
+            public PacketEventArgs(byte type, byte flag, byte[] data, int len)
             {
-                this.packetType = type;
-                this.packetFlag = flag;
-                this.packetData = data;
+                packetType = type;
+                packetFlag = flag;
+                packetData = data;
+                dataLength = len;
             }
         }
         private static void ReadAllFromStream(NetworkStream stream, byte[] buffer, int len)
         {
             int current = 0;
-            while (current < buffer.Length)
-                current += stream.Read(buffer, current, len - current > buffer.Length ? buffer.Length : len - current);
+            while (current < len)
+                current += stream.Read(buffer, current, len - current > len ? len : len - current);
         }
 
-        private static byte ReadByteFromStream(NetworkStream stream)
+        private static byte ReadByteFromStream(Stream stream)
         {
             int ret;
             do ret = stream.ReadByte();
@@ -182,21 +160,23 @@ namespace KNRAnglerN
             void YeetLog(string info);
         }
 
-        public bool IsConnected() {
-            return _connected;
-        }
+        public bool IsConnected() => _connected;
 
-        public struct Packet
-        {
-            public byte packetType;
-            public byte flag;
-            public byte[] bytes;
+        private readonly struct Packet
+        {   
+            public readonly byte type;
+            public readonly byte flag;
+            public readonly byte[] bytes;
+            public readonly bool rented;
+            public readonly int length;
 
-            public Packet(byte packetType, byte flag, byte[] bytes)
+            public Packet(byte type, byte flag, byte[] bytes, int length, bool rented)
             {
-                this.packetType = packetType;
+                this.type = type;
                 this.flag = flag;
                 this.bytes = bytes;
+                this.length = length;
+                this.rented = rented;
             }
         }
     }

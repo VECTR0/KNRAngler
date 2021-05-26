@@ -1,11 +1,14 @@
-﻿namespace KNRAnglerN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace KNRAnglerN
 {
     partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -108,7 +111,6 @@
             // 
             // tmrHUD
             // 
-            this.tmrHUD.Enabled = true;
             this.tmrHUD.Interval = 5;
             this.tmrHUD.Tick += new System.EventHandler(this.tmrHUD_Tick);
             // 
@@ -164,17 +166,17 @@
         }
 
         #endregion
-        public System.Windows.Forms.PictureBox pictureBox1;
-        public System.Windows.Forms.Timer tmrGetVideo;
-        public System.Windows.Forms.PictureBox picDepthMap;
-        public System.Windows.Forms.Label lblFrameRate;
-        public System.Windows.Forms.Button btnShowSettings;
-        public System.Windows.Forms.Button btnShowConsole;
-        private System.Windows.Forms.Timer tmrFramerate;
-        private System.Windows.Forms.Timer tmrHUD;
-        private System.Windows.Forms.PictureBox picHUD;
-        public System.Windows.Forms.Button btnShowCloud;
-        private System.Windows.Forms.Timer tmrGamepad;
+        public PictureBox pictureBox1;
+        public Timer tmrGetVideo;
+        public PictureBox picDepthMap;
+        public Label lblFrameRate;
+        public Button btnShowSettings;
+        public Button btnShowConsole;
+        private Timer tmrFramerate;
+        private Timer tmrHUD;
+        private PictureBox picHUD;
+        public Button btnShowCloud;
+        private Timer tmrGamepad;
     }
 }
 

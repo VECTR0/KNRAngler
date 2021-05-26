@@ -1,11 +1,14 @@
-﻿namespace KNRAnglerN
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace KNRAnglerN
 {
     partial class SettingsForm
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -215,19 +218,19 @@
 
         #endregion
 
-        public System.Windows.Forms.Button btnStartVideo;
-        public System.Windows.Forms.Button btnConnectVideo;
-        public System.Windows.Forms.TextBox txtJsonPort;
-        public System.Windows.Forms.TextBox txtVideoPort;
-        public System.Windows.Forms.TextBox txtIp;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Panel pnlSettings;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
-        public System.Windows.Forms.Button btnConnectJson;
-        public System.Windows.Forms.CheckBox chkManualControl;
-        public System.Windows.Forms.CheckBox chkVideoFeed;
-        public System.Windows.Forms.CheckBox chkYeetLog;
-        public System.Windows.Forms.CheckBox chkDepth;
+        public Button btnStartVideo;
+        public Button btnConnectVideo;
+        public TextBox txtJsonPort;
+        public TextBox txtVideoPort;
+        public TextBox txtIp;
+        private Label label1;
+        private Panel pnlSettings;
+        private Label label3;
+        private Label label2;
+        public Button btnConnectJson;
+        public CheckBox chkManualControl;
+        public CheckBox chkVideoFeed;
+        public CheckBox chkYeetLog;
+        public CheckBox chkDepth;
     }
 }

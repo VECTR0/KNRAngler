@@ -8,7 +8,7 @@ namespace KNRAnglerN
     {
         public int width, height;
         public float vFov, hFov;
-        public KNRAnglerN.Gyro gyro;
+        public Gyro gyro;
         public float metersUnderWater;
         public float batteryFill = 0.9f, batteryVoltage = 10.1f;
         private Dictionary<string, bool> enable = new Dictionary<string, bool>();
@@ -45,7 +45,7 @@ namespace KNRAnglerN
                 enable[key] = state;
         }
 
-        public void Update(KNRAnglerN.Gyro gyro)
+        public void Update(Gyro gyro)
         {
             this.gyro = gyro;
         }
@@ -59,8 +59,8 @@ namespace KNRAnglerN
             {
                 g.FillRectangle(Brushes.Black, 0, 0, W, H);
 
-                Pen green = new Pen(Brushes.Red, 3);
-                Pen debug = new Pen(Brushes.Aquamarine, 1);
+                using Pen green = new Pen(Brushes.Red, 3);
+                using Pen debug = new Pen(Brushes.Aquamarine, 1);
 
                 if (enable["ladder"])
                 {//LADDER
@@ -72,7 +72,7 @@ namespace KNRAnglerN
                     float cos = (float)+Math.Cos(ToRadians(-roll));
                     float sin = (float)-Math.Sin(ToRadians(-roll));
                     float fontHeight = 20;
-                    Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
+                    using Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
 
                     float ellSize = 0.01f;
                     g.DrawEllipse(green, W / 2 - W * ellSize / 2, H / 2 - W * ellSize / 2, W * ellSize, W * ellSize);
@@ -153,7 +153,7 @@ namespace KNRAnglerN
 
                     float textBoxH = 0.7f;
                     float fontHeight = H * h * textBoxH;
-                    Font f = new Font("Inconsolata", fontHeight * 0.7f, FontStyle.Bold);
+                    using Font f = new Font("Inconsolata", fontHeight * 0.7f, FontStyle.Bold);
 
                     float rulerH = 0.3f;
                     float fontSmallH = 0.8f;
@@ -210,7 +210,7 @@ namespace KNRAnglerN
                     float h = 0.7f;
                     float right = 0.01f;
                     float fontHeight = 30;
-                    Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
+                    using Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
 
 
                     float anchorX = W - W * w - W * right;
@@ -247,7 +247,7 @@ namespace KNRAnglerN
                     float centerX = W / 2;
                     float centerY = H / 2;
                     float fontHeight = 30;
-                    Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
+                    using Font f = new Font("Inconsolata", fontHeight * 0.6f, FontStyle.Bold);
 
                     float angleVisible = 90;
                     g.DrawArc(green, W / 2 - H * r, H / 2 - H * r, 2 * H * r, 2 * H * r, 90 - angleVisible / 2, angleVisible);
@@ -294,7 +294,7 @@ namespace KNRAnglerN
 
                     float textBoxH = 0.05f;
                     float fontHeight = H * textBoxH;
-                    Font f = new Font("Inconsolata", fontHeight * 0.7f, FontStyle.Bold);
+                    using Font f = new Font("Inconsolata", fontHeight * 0.7f, FontStyle.Bold);
                     g.DrawString("BAT " + batteryVoltage.ToString(".0"), f, Brushes.Red, anchorX, anchorY - g.MeasureString("-180", f).Height);
                 }
 
@@ -308,7 +308,7 @@ namespace KNRAnglerN
                 }
                 void DrawLineOnArcBold(float x_, float y_, float a_, float s_, float e_)
                 {
-                    Pen newPen = new Pen(green.Brush, green.Width * 2);
+                    using Pen newPen = new Pen(green.Brush, green.Width * 2);
                     newPen.Width = green.Width * 2;
                     a_ *= (float)Math.PI / 180.0f;
                     g.DrawLine(newPen, x_ + (float)(Math.Cos(a_) * s_), y_ - (float)(Math.Sin(a_) * s_), x_ + (float)(Math.Cos(a_) * (e_)), y_ - (float)(Math.Sin(a_) * e_));
