@@ -7,7 +7,7 @@ namespace KNRAnglerN
     {
         MainForm instance;
 
-        public string Log { get { return "nothing"; } set { txtConsole.AppendText(value + Environment.NewLine); } }
+        public string Log { get { return "nothing"; } set { txtConsole.AppendText(value + "\r\n"); } }
 
 
         public ConsoleForm(MainForm mainForm)

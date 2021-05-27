@@ -49,6 +49,7 @@ namespace KNRAnglerN
             GET_CPS = 0xC6,
             HIT_NGZ = 0xC7,
             HIT_FZ = 0xC8,
+            CHK_AP = 0xC9,
             REC_STRT = 0xD0,
             REC_ST = 0xD1,
             REC_RST = 0xD2,
@@ -131,7 +132,7 @@ namespace KNRAnglerN
             switch ((Packet)e.packetType)
             {
                case Packet.GET_DEPTH:
-                    consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + Encoding.ASCII.GetString(e.packetData, 0, e.packetData.Length);
+                    consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + Encoding.ASCII.GetString(e.packetData, 0, e.dataLength);
                     var json = JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData, 0, e.dataLength));
                     /* using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(json["depth"])))
                      {
@@ -145,7 +146,7 @@ namespace KNRAnglerN
                     break;
                 case Packet.GET_DEPTH_BYTES:
                     requestedDepthMapFrames--;
-                    //consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + "size: " + e.packetData.Length +"B";
+                    //consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + "size: " + e.dataLength +"B";
                     using (var ms = new MemoryStream(e.packetData, 0, e.dataLength))
                     {
                         picDepthMap.Invoke(new Action(() =>
@@ -158,7 +159,7 @@ namespace KNRAnglerN
                     break;
                 case Packet.GET_VIDEO_BYTES:
                     requestedVideoFeedFrames--;
-                    //consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + "size: " + e.packetData.Length +"B";
+                    //consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + "size: " + e.dataLength +"B";
                     using (var ms = new MemoryStream(e.packetData, 0, e.dataLength))
                     {
                         pictureBox1.Invoke(new Action(() =>
@@ -190,10 +191,9 @@ namespace KNRAnglerN
                     consoleForm.Log = "HIT FZ " + (string)json["id"];
                     break;
                 default:
-                    consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + Encoding.ASCII.GetString(e.packetData, 0, e.packetData.Length);
+                   consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + Encoding.ASCII.GetString(e.packetData, 0, e.dataLength);
                     break;
             }
-            
         }
 
         private void tmrFrameRate_Tick(object sender, EventArgs e)
