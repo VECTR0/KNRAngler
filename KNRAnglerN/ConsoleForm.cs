@@ -7,8 +7,12 @@ namespace KNRAnglerN
     {
         MainForm instance;
 
-        public string Log { get { return "nothing"; } set { txtConsole.AppendText(value + "\r\n"); } }
-
+        public string Log { get { return "nothing"; } set
+            {
+                txtConsole.AppendText(value);
+                txtConsole.AppendText(Environment.NewLine);
+            }
+        }
 
         public ConsoleForm(MainForm mainForm)
         {
@@ -31,6 +35,9 @@ namespace KNRAnglerN
                     break;
                 case MainForm.Packet.SET_ORIEN:
                     txtJson.Text = "{ \"rot\":{ \"x\":0,\"y\":0,\"z\":0},\"pos\":{ \"x\":0,\"y\":0,\"z\":0} }";
+                    break;
+                case MainForm.Packet.CHK_AP:
+                    txtJson.Text = "{\"id\":\"\"}";
                     break;
                 default:
                     txtJson.Text = "{}";

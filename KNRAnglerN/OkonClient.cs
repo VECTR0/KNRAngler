@@ -69,7 +69,7 @@ namespace KNRAnglerN
                         ReadAllFromStream(_stream, dataBytes, dataLength);
                         PacketReceived?.Invoke(this, new PacketEventArgs(packetType, packetFlag, dataBytes, dataLength));
                         ArrayPool<byte>.Shared.Return(dataBytes);
-                       // _info.YeetLog("Received packet type: " + packetType.ToString("x2") + " flag:" + Convert.ToString(packetFlag, 2).PadLeft(8, '0') + " len: " + dataLength);
+                        _info.YeetLog("Received packet type: " + packetType.ToString("x2") + " flag:" + Convert.ToString(packetFlag, 2).PadLeft(8, '0') + " len: " + dataLength);
                     }
                     else
                     {

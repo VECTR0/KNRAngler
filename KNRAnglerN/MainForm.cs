@@ -192,7 +192,7 @@ namespace KNRAnglerN
                     break;
                 default:
                    consoleForm.Log = " RECV[" + Enum.GetName(typeof(Packet), e.packetType).PadRight(maxLength) + "] " + Encoding.ASCII.GetString(e.packetData, 0, e.dataLength);
-                    break;
+                   break;
             }
         }
 
