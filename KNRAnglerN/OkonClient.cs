@@ -111,6 +111,7 @@ namespace KNRAnglerN
             _stream.WriteByte(packet.flag);
             _stream.Write(BitConverter.GetBytes(packet.length), 0, 4);
             _stream.Write(packet.bytes, 0, packet.length);
+            _info.YeetLog("Send packet type: " + packet.type.ToString("x2") + " flag:" + Convert.ToString(packet.flag, 2).PadLeft(8, '0') + " len: " + packet.length.ToString());
         }
 
         private void Disconnect()

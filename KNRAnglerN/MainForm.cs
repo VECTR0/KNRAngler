@@ -180,7 +180,7 @@ namespace KNRAnglerN
                     break;
                 case Packet.PING:
                     json = JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData, 0, e.dataLength));
-                    _ping = (int)json["ping"];
+                    _ping = (int)((DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) - (long)json["timestamp"])/2;
                     break;
                 case Packet.HIT_NGZ:
                     json = JsonSerializer.Deserialize<dynamic>(Encoding.ASCII.GetString(e.packetData, 0, e.dataLength));
@@ -346,8 +346,8 @@ namespace KNRAnglerN
 
             _framesLastCheck = DateTime.Now;
             _framesNum = 0;
-            if (okonClient != null && okonClient.IsConnected()) okonClient.EnqueuePacket((byte)Packet.PING, (byte)Flag.DO_NOT_LOG_PACKET, "{\"timestamp\":" + (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) + ",\"ping\":0}");
-        }//TODO check if try catch was needed
+            if (okonClient != null && okonClient.IsConnected()) okonClient.EnqueuePacket((byte)Packet.PING, (byte)Flag.DO_NOT_LOG_PACKET, "{\"timestamp\":" + (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond) + "}");
+        }
 
         private void tmrHUD_Tick(object sender, EventArgs e)
         {
