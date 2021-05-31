@@ -43,13 +43,13 @@ namespace KNRAnglerN
             this.btnGenerate = new System.Windows.Forms.Button();
             this.trbScale = new System.Windows.Forms.TrackBar();
             this.tmrGenerate = new System.Windows.Forms.Timer(this.components);
-            ((System.ComponentModel.ISupportInitialize)(this.picRender)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbTranslateY)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbTranslateX)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbRotationX)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbTranslateZ)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbRotationY)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbScale)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.picRender)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbTranslateY)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbTranslateX)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbRotationX)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbTranslateZ)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbRotationY)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbScale)).BeginInit();
             this.SuspendLayout();
             // 
             // picRender
@@ -62,6 +62,7 @@ namespace KNRAnglerN
             // 
             // tmrRender
             // 
+            this.tmrRender.Enabled = true;
             this.tmrRender.Interval = 50;
             this.tmrRender.Tick += new System.EventHandler(this.tmrRender_Tick);
             // 
@@ -148,7 +149,7 @@ namespace KNRAnglerN
             // 
             // tmrGenerate
             // 
-            this.tmrGenerate.Interval = 1000;
+            this.tmrGenerate.Interval = 50;
             this.tmrGenerate.Tick += new System.EventHandler(this.tmrGenerate_Tick);
             // 
             // CloudForm
@@ -168,30 +169,29 @@ namespace KNRAnglerN
             this.Name = "CloudForm";
             this.Text = "Cloud viewer";
             this.Load += new System.EventHandler(this.CloudForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.picRender)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbTranslateY)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbTranslateX)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbRotationX)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbTranslateZ)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbRotationY)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trbScale)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.picRender)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbTranslateY)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbTranslateX)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbRotationX)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbTranslateZ)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbRotationY)).EndInit();
+            ((System.ComponentModel.ISupportInitialize) (this.trbScale)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
 
-        private PictureBox picRender;
-        private Timer tmrRender;
+        private System.Windows.Forms.PictureBox picRender;
+        private System.Windows.Forms.Timer tmrRender;
         private TrackBar trbTranslateY;
         private TrackBar trbTranslateX;
         private TrackBar trbRotationX;
         private TrackBar trbTranslateZ;
         private TrackBar trbRotationY;
         private Label lblNum;
-        private Button btnGenerate;
+        private System.Windows.Forms.Button btnGenerate;
         private TrackBar trbScale;
-        private Timer tmrGenerate;
+        private System.Windows.Forms.Timer tmrGenerate;
     }
 }

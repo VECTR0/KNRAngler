@@ -14,7 +14,7 @@ namespace KNRAnglerN
     {
         private Sensors _sens = new Sensors();
 
-        private const string Ver = "7.3";
+        private const string Ver = "7.4";
         public readonly ConsoleForm consoleForm;
         public readonly SettingsForm settingsForm;
         public readonly CloudForm cloudForm;
@@ -72,8 +72,8 @@ namespace KNRAnglerN
             consoleForm = new ConsoleForm(this);
             settingsForm = new SettingsForm(this);
             Text = "KNR Wędkarz - Okoń Sim control v" + Ver + " by Vectro 2021";
-            /*cloudForm = new CloudForm(this) { Visible = true };
-            cloudForm.Hide();*/
+            cloudForm = new CloudForm(this) { Visible = true };
+            cloudForm.Hide();
            
             //DInput
             foreach (var deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices))
